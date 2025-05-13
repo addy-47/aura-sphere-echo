@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, Suspense } from 'react';
+import React, { useRef, useEffect, Suspense, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useMood } from '../contexts/MoodContext';
@@ -9,10 +9,22 @@ interface SphereProps {
   isProcessing: boolean;
 }
 
+// Ensure THREE is loaded before any components render
+const ensureThreeIsLoaded = () => {
+  if (!window.THREE) {
+    window.THREE = THREE;
+    console.log("THREE forced initialization in component:", THREE.REVISION);
+  }
+};
+
 // This is the actual 3D sphere component within the Canvas
 const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const { moodColor, mood } = useMood();
+  
+  useEffect(() => {
+    ensureThreeIsLoaded();
+  }, []);
   
   // Animation logic for the sphere
   useFrame(({ clock }) => {
@@ -61,20 +73,28 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   );
 };
 
+const Fallback = () => (
+  <div className="w-full h-full flex items-center justify-center">
+    <div className="text-center p-4">Loading 3D scene...</div>
+  </div>
+);
+
 // This is the main component that wraps the Canvas and the sphere
 const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
-  // Use effect to initialize THREE globally
+  const [threeReady, setThreeReady] = useState(false);
+  
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.THREE = THREE;
-      // Force initialization of THREE modules
-      console.log("THREE initialized:", !!window.THREE);
-    }
+    ensureThreeIsLoaded();
+    setThreeReady(true);
   }, []);
+
+  if (!threeReady) {
+    return <Fallback />;
+  }
   
   return (
     <div className="w-full h-full min-h-[300px]">
-      <Suspense fallback={<div className="text-center p-4">Loading 3D scene...</div>}>
+      <Suspense fallback={<Fallback />}>
         <Canvas 
           camera={{ position: [0, 0, 3.5], fov: 50 }}
           dpr={[1, 2]} 
@@ -83,8 +103,9 @@ const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
             powerPreference: 'default',
             failIfMajorPerformanceCaveat: false
           }}
-          onCreated={({ gl }) => {
+          onCreated={({ gl, scene }) => {
             gl.setClearColor(0x000000, 0);
+            console.log("Canvas created successfully");
           }}
         >
           <ambientLight intensity={0.5} />

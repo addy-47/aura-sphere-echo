@@ -1,13 +1,15 @@
 
-import React, { useState, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useMood } from '../contexts/MoodContext';
 import { moodColors } from '../contexts/MoodContext';
 import Layout from '../components/Layout';
-import Sphere3D from '../components/Sphere3D';
 import { Send } from 'lucide-react';
+
+// Import Sphere3D with React.lazy for code splitting
+const Sphere3D = lazy(() => import('../components/Sphere3D'));
 
 interface Message {
   id: string;
@@ -106,7 +108,11 @@ const ChatPage = () => {
         {/* 3D Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-lg border flex items-center justify-center">
-            <Suspense fallback={<div className="text-center p-4">Loading 3D scene...</div>}>
+            <Suspense fallback={
+              <div className="text-center p-4 w-full h-full flex items-center justify-center">
+                <div className="animate-pulse">Loading 3D visualization...</div>
+              </div>
+            }>
               <Sphere3D isProcessing={isProcessing} />
             </Suspense>
           </Card>

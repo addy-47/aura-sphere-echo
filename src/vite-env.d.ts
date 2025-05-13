@@ -4,7 +4,12 @@
 /// <reference types="@react-three/drei" />
 /// <reference types="three" />
 
-// Extend the Window interface to include THREE
-interface Window {
-  THREE: typeof import('three');
+// Explicitly define THREE on window for global access
+declare global {
+  interface Window {
+    THREE: typeof import('three');
+  }
 }
+
+// Make sure to export something to make this a module
+export {};
