@@ -47,7 +47,7 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   };
 
   return (
-    <Sphere args={[1, 64, 64]}>
+    <Sphere args={[1, 64, 64]} ref={sphereRef}>
       <meshStandardMaterial 
         color={moodColor}
         emissive={moodColor}
