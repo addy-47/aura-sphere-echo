@@ -62,6 +62,14 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
 
 // This is the main component that wraps the Canvas and the sphere
 const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
+  // Add useEffect to ensure THREE is available
+  useEffect(() => {
+    // This will force Three.js to initialize properly
+    if (!window.THREE) {
+      window.THREE = THREE;
+    }
+  }, []);
+  
   return (
     <div className="w-full h-full min-h-[300px]">
       <Canvas 

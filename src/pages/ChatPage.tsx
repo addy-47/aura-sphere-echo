@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -106,7 +106,9 @@ const ChatPage = () => {
         {/* 3D Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-lg border flex items-center justify-center">
-            <Sphere3D isProcessing={isProcessing} />
+            <Suspense fallback={<div className="text-center">Loading 3D scene...</div>}>
+              <Sphere3D isProcessing={isProcessing} />
+            </Suspense>
           </Card>
         </div>
         
