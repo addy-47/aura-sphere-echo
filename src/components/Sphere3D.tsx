@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, Suspense, useState } from 'react';
+import React, { useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useMood } from '../contexts/MoodContext';
@@ -9,22 +9,10 @@ interface SphereProps {
   isProcessing: boolean;
 }
 
-// Ensure THREE is loaded before any components render
-const ensureThreeIsLoaded = () => {
-  if (!window.THREE) {
-    window.THREE = THREE;
-    console.log("THREE forced initialization in component:", THREE.REVISION);
-  }
-};
-
-// This is the actual 3D sphere component within the Canvas
+// The actual 3D sphere component within the Canvas
 const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const { moodColor, mood } = useMood();
-  
-  useEffect(() => {
-    ensureThreeIsLoaded();
-  }, []);
   
   // Animation logic for the sphere
   useFrame(({ clock }) => {
@@ -45,7 +33,7 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
     }
   });
 
-  // Determine emission intensity based on mood and processing state
+  // Determine emission intensity based on mood
   const getEmissiveIntensity = () => {
     if (isProcessing) return 1.5;
     
@@ -73,25 +61,23 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   );
 };
 
+// Fallback component for when the 3D scene is loading
 const Fallback = () => (
   <div className="w-full h-full flex items-center justify-center">
-    <div className="text-center p-4">Loading 3D scene...</div>
+    <div className="text-center p-4">Loading 3D visualization...</div>
   </div>
 );
 
-// This is the main component that wraps the Canvas and the sphere
+// Main component that wraps the Canvas and the sphere
 const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
-  const [threeReady, setThreeReady] = useState(false);
-  
+  // Make sure THREE is accessible on window
   useEffect(() => {
-    ensureThreeIsLoaded();
-    setThreeReady(true);
+    if (!window.THREE) {
+      window.THREE = THREE;
+      console.log("THREE initialized in component:", THREE.REVISION);
+    }
   }, []);
 
-  if (!threeReady) {
-    return <Fallback />;
-  }
-  
   return (
     <div className="w-full h-full min-h-[300px]">
       <Suspense fallback={<Fallback />}>
@@ -102,10 +88,6 @@ const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
             antialias: true,
             powerPreference: 'default',
             failIfMajorPerformanceCaveat: false
-          }}
-          onCreated={({ gl, scene }) => {
-            gl.setClearColor(0x000000, 0);
-            console.log("Canvas created successfully");
           }}
         >
           <ambientLight intensity={0.5} />

@@ -1,13 +1,15 @@
 
-// Import Three.js first to ensure it's available before any other imports
+// Import Three.js first to ensure it's available globally
 import * as THREE from 'three';
 
-// Make THREE available globally - CRITICAL for drei compatibility
+// Make THREE available globally for drei
 window.THREE = THREE;
-console.log("THREE initialized:", !!window.THREE, THREE.REVISION);
 
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+
+// Log that THREE is initialized
+console.log("THREE initialized globally:", !!window.THREE, "version:", THREE.REVISION);
 
 createRoot(document.getElementById("root")!).render(<App />);

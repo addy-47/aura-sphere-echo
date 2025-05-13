@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,9 +6,19 @@ import { useMood } from '../contexts/MoodContext';
 import { moodColors } from '../contexts/MoodContext';
 import Layout from '../components/Layout';
 import { Send } from 'lucide-react';
+import * as THREE from 'three';
+
+// Ensure THREE is available globally
+if (!window.THREE) {
+  window.THREE = THREE;
+  console.log("THREE initialized in ChatPage:", THREE.REVISION);
+}
 
 // Import Sphere3D with React.lazy for code splitting
-const Sphere3D = lazy(() => import('../components/Sphere3D'));
+const Sphere3D = lazy(() => {
+  console.log("Lazy loading Sphere3D component");
+  return import('../components/Sphere3D');
+});
 
 interface Message {
   id: string;
