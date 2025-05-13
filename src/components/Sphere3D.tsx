@@ -67,6 +67,14 @@ const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
       <Canvas 
         camera={{ position: [0, 0, 3.5], fov: 50 }}
         dpr={[1, 2]} // Optimize for performance by limiting max pixel ratio
+        gl={{ 
+          antialias: true,
+          powerPreference: 'default',
+          failIfMajorPerformanceCaveat: false
+        }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0);
+        }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
