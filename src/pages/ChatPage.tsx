@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useMood } from '../contexts/MoodContext';
+import { moodColors } from '../contexts/MoodContext';
 import Layout from '../components/Layout';
 import Sphere3D from '../components/Sphere3D';
 import { Send } from 'lucide-react';
@@ -170,7 +171,7 @@ const ChatPage = () => {
                   className={`w-8 h-8 rounded-full border-2 transition-all ${
                     mood === m ? 'scale-110 border-primary' : 'border-transparent'
                   }`}
-                  style={{ backgroundColor: useMood().moodColors[m] }}
+                  style={{ backgroundColor: moodColors[m] }}
                   title={m.charAt(0).toUpperCase() + m.slice(1)}
                   aria-label={`Set mood to ${m}`}
                 />

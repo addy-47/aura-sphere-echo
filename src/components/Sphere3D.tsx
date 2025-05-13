@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere } from '@react-three/drei';
 import { useMood } from '../contexts/MoodContext';
+import * as THREE from 'three';
 
 interface SphereProps {
   isProcessing: boolean;
@@ -46,7 +47,7 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   };
 
   return (
-    <Sphere args={[1, 64, 64]} ref={sphereRef}>
+    <Sphere args={[1, 64, 64]}>
       <meshStandardMaterial 
         color={moodColor}
         emissive={moodColor}
