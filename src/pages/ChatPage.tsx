@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import { Send } from 'lucide-react';
 import * as THREE from 'three';
 
 // Ensure THREE is available globally
-if (!window.THREE) {
+if (typeof window !== 'undefined' && !window.THREE) {
   window.THREE = THREE;
   console.log("THREE initialized in ChatPage:", THREE.REVISION);
 }
@@ -17,7 +18,17 @@ if (!window.THREE) {
 // Import Sphere3D with React.lazy for code splitting
 const Sphere3D = lazy(() => {
   console.log("Lazy loading Sphere3D component");
-  return import('../components/Sphere3D');
+  return import('../components/Sphere3D').catch(error => {
+    console.error("Failed to load Sphere3D:", error);
+    // Return a simple fallback module
+    return { 
+      default: (props: any) => (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-center p-4">Error loading 3D visualization</div>
+        </div>
+      )
+    };
+  });
 });
 
 interface Message {
@@ -122,7 +133,11 @@ const ChatPage = () => {
                 <div className="animate-pulse">Loading 3D visualization...</div>
               </div>
             }>
-              <Sphere3D isProcessing={isProcessing} />
+              {typeof window !== 'undefined' && window.THREE ? (
+                <Sphere3D isProcessing={isProcessing} />
+              ) : (
+                <div className="text-center p-4">Three.js not initialized</div>
+              )}
             </Suspense>
           </Card>
         </div>
