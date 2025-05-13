@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,15 +53,26 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				// Mood-based colors
+				happy: {
+					DEFAULT: '#7dc4e4',  // light blue
+					foreground: '#ffffff'
+				},
+				sad: {
+					DEFAULT: '#5e81ac',  // dark blue
+					foreground: '#ffffff'
+				},
+				neutral: {
+					DEFAULT: '#9f9ea1',  // silver gray
+					foreground: '#ffffff'
+				},
+				excited: {
+					DEFAULT: '#d08770',  // orange
+					foreground: '#ffffff'
+				},
+				angry: {
+					DEFAULT: '#bf616a',  // red
+					foreground: '#ffffff'
 				}
 			},
 			borderRadius: {
@@ -70,26 +82,52 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' },
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' },
+				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '1', transform: 'scale(1)' },
+					'50%': { opacity: '0.8', transform: 'scale(1.05)' },
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'spin-slow': {
+					to: { transform: 'rotate(360deg)' },
+				},
+				'wave': {
+					'0%': { transform: 'translateY(0)' },
+					'25%': { transform: 'translateY(-5px)' },
+					'50%': { transform: 'translateY(0)' },
+					'75%': { transform: 'translateY(5px)' },
+					'100%': { transform: 'translateY(0)' },
+				},
+				'gradient-x': {
+					'0%, 100%': {
+						'background-position': '0% 50%',
 					},
-					to: {
-						height: '0'
-					}
-				}
+					'50%': {
+						'background-position': '100% 50%',
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-slow': 'pulse-slow 3s infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'spin-slow': 'spin-slow 8s linear infinite',
+				'wave': 'wave 2s ease-in-out infinite',
+				'gradient-x': 'gradient-x 5s ease infinite',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
