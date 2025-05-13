@@ -106,7 +106,7 @@ const ChatPage = () => {
         {/* 3D Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-lg border flex items-center justify-center">
-            <Suspense fallback={<div className="text-center">Loading 3D scene...</div>}>
+            <Suspense fallback={<div className="text-center p-4">Loading 3D scene...</div>}>
               <Sphere3D isProcessing={isProcessing} />
             </Suspense>
           </Card>

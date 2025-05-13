@@ -1,7 +1,7 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sphere } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { useMood } from '../contexts/MoodContext';
 import * as THREE from 'three';
 
@@ -47,7 +47,8 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   };
 
   return (
-    <Sphere args={[1, 64, 64]} ref={sphereRef}>
+    <mesh ref={sphereRef}>
+      <sphereGeometry args={[1, 64, 64]} />
       <meshStandardMaterial 
         color={moodColor}
         emissive={moodColor}
@@ -56,48 +57,51 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
         metalness={0.8}
         wireframe={mood === 'sad' || mood === 'neutral'}
       />
-    </Sphere>
+    </mesh>
   );
 };
 
 // This is the main component that wraps the Canvas and the sphere
 const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
-  // Add useEffect to ensure THREE is available
+  // Use effect to initialize THREE globally
   useEffect(() => {
-    // This will force Three.js to initialize properly
-    if (!window.THREE) {
+    if (typeof window !== 'undefined') {
       window.THREE = THREE;
+      // Force initialization of THREE modules
+      console.log("THREE initialized:", !!window.THREE);
     }
   }, []);
   
   return (
     <div className="w-full h-full min-h-[300px]">
-      <Canvas 
-        camera={{ position: [0, 0, 3.5], fov: 50 }}
-        dpr={[1, 2]} // Optimize for performance by limiting max pixel ratio
-        gl={{ 
-          antialias: true,
-          powerPreference: 'default',
-          failIfMajorPerformanceCaveat: false
-        }}
-        onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0);
-        }}
-      >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} />
-        
-        <AnimatedSphere isProcessing={isProcessing} />
-        
-        <OrbitControls 
-          enableZoom={false}
-          enablePan={false}
-          rotateSpeed={0.5}
-          autoRotate
-          autoRotateSpeed={0.5}
-        />
-      </Canvas>
+      <Suspense fallback={<div className="text-center p-4">Loading 3D scene...</div>}>
+        <Canvas 
+          camera={{ position: [0, 0, 3.5], fov: 50 }}
+          dpr={[1, 2]} 
+          gl={{ 
+            antialias: true,
+            powerPreference: 'default',
+            failIfMajorPerformanceCaveat: false
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+          }}
+        >
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
+          <pointLight position={[-10, -10, -5]} intensity={0.5} />
+          
+          <AnimatedSphere isProcessing={isProcessing} />
+          
+          <OrbitControls 
+            enableZoom={false}
+            enablePan={false}
+            rotateSpeed={0.5}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
+        </Canvas>
+      </Suspense>
     </div>
   );
 };
