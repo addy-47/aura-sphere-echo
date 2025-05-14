@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import ChatPage from "./pages/ChatPage";
 import CustomizePage from "./pages/CustomizePage";
 import DashboardPage from "./pages/DashboardPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 import { MoodProvider } from "./contexts/MoodContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -30,6 +32,8 @@ const App = () => (
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/customize" element={<CustomizePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

@@ -11,21 +11,29 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface LayoutProps {
   children: React.ReactNode;
   minimal?: boolean;
+  isAuthenticated?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
+const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthenticated = false }) => {
   const { theme, toggleTheme } = useTheme();
   const { moodColor } = useMood();
   const location = useLocation();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const navItems = [
-    { path: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
-    { path: '/chat', icon: <MessageCircle className="h-5 w-5" />, label: 'Chat' },
-    { path: '/customize', icon: <Settings className="h-5 w-5" />, label: 'Customize' },
-    { path: '/dashboard', icon: <User className="h-5 w-5" />, label: 'Dashboard' },
-  ];
+  // Define nav items based on authentication status
+  const navItems = isAuthenticated 
+    ? [
+        { path: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
+        { path: '/chat', icon: <MessageCircle className="h-5 w-5" />, label: 'Chat' },
+        { path: '/customize', icon: <Settings className="h-5 w-5" />, label: 'Customize' },
+        { path: '/dashboard', icon: <User className="h-5 w-5" />, label: 'Dashboard' },
+      ]
+    : [
+        { path: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
+        { path: '/chat', icon: <MessageCircle className="h-5 w-5" />, label: 'Chat' },
+        { path: '/customize', icon: <Settings className="h-5 w-5" />, label: 'Customize' },
+      ];
 
   if (minimal) {
     return (
@@ -77,6 +85,18 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
               
+              {!isAuthenticated && (
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  className="border-white/10 text-white hover:bg-white/10 hover:text-white rounded-full"
+                >
+                  <Link to="/chat">
+                    Sign in
+                  </Link>
+                </Button>
+              )}
+              
               <div className="md:hidden">
                 <Button 
                   variant="ghost" 
@@ -109,6 +129,16 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
                     <span>{item.label}</span>
                   </Link>
                 ))}
+                
+                {!isAuthenticated && (
+                  <Link 
+                    to="/chat"
+                    className="flex items-center gap-2 p-2 mt-2 bg-white/10 rounded-lg text-white font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                )}
               </nav>
             </div>
           )}
@@ -118,7 +148,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
       {/* Add padding to account for fixed header */}
       <div className={`pt-16`}></div>
       
-      <main className="flex-1">
+      <main className="flex-1 min-h-[calc(100vh-16rem)]">
         {children}
       </main>
       
@@ -145,11 +175,10 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
               </div>
               
               <div className="flex flex-col items-center md:items-start">
-                <h3 className="font-semibold mb-3 text-white">Resources</h3>
+                <h3 className="font-semibold mb-3 text-white">Legal</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
+                  <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
                 </ul>
               </div>
               
@@ -178,7 +207,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
       
       {/* Only show mobile bottom nav if not on chat page or we're on chat page but not mobile */}
       {(location.pathname !== '/chat' || !isMobile) && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 p-2 flex justify-around">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 p-2 flex justify-around z-40">
           {navItems.map((item) => (
             <Link 
               key={item.path} 
