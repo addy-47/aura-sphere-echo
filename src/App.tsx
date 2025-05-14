@@ -12,6 +12,7 @@ import DashboardPage from "./pages/DashboardPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
+import SignInPage from "./pages/SignInPage"; 
 import { MoodProvider } from "./contexts/MoodContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -34,6 +35,7 @@ const App = () => (
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/signin" element={<SignInPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
