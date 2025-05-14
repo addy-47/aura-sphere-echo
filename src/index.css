@@ -73,6 +73,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: hidden;
   }
   
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -87,7 +88,7 @@
   }
   
   .glassmorphism {
-    @apply backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border-none;
+    @apply backdrop-blur-lg bg-white/5 rounded-xl border-none shadow-lg;
   }
   
   .gradient-text {
@@ -99,15 +100,20 @@
   }
   
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-none;
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:bg-opacity-80 hover:shadow-lg;
+    @apply transition-all duration-300 hover:bg-opacity-80 hover:shadow-lg border-none;
   }
   
   .mood-glow {
     transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  }
+
+  /* Card border removal */
+  .rounded-lg, .rounded-xl, .rounded-2xl {
+    @apply border-none shadow-md;
   }
 }
 
@@ -122,5 +128,31 @@
   
   .animation-play {
     animation-play-state: running;
+  }
+
+  /* Gradient text animation */
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease-in-out infinite;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  /* Hover reveal animation */
+  .hover-reveal {
+    @apply relative overflow-hidden;
+  }
+
+  .hover-reveal::after {
+    @apply absolute inset-0 bg-white bg-opacity-5 transform -translate-x-full transition-transform duration-300 ease-in-out;
+    content: '';
+  }
+
+  .hover-reveal:hover::after {
+    @apply translate-x-0;
   }
 }
