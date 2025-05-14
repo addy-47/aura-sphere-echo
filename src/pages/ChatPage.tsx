@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { useMood } from '../contexts/MoodContext';
 import { moodColors } from '../contexts/MoodContext';
 import Layout from '../components/Layout';
-import { Send } from 'lucide-react';
+import { Send, ChevronUp, ChevronDown } from 'lucide-react';
 import * as THREE from 'three';
+import { useIsMobile } from '../hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Ensure THREE is available globally
 if (typeof window !== 'undefined' && !window.THREE) {
@@ -51,6 +53,8 @@ const ChatPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { mood, setMood, moodColor } = useMood();
+  const isMobile = useIsMobile();
+  const [chatExpanded, setChatExpanded] = useState(!isMobile);
 
   useEffect(() => {
     scrollToBottom();
@@ -120,14 +124,130 @@ const ChatPage = () => {
     };
     
     setMessages((prev) => [...prev, aiMessage]);
+    
+    // Expand chat on mobile when a message is sent
+    if (isMobile && !chatExpanded) {
+      setChatExpanded(true);
+    }
   };
 
+  // Special layout for mobile chat page
+  if (isMobile) {
+    return (
+      <Layout>
+        <div className="flex flex-col h-[calc(100vh-8rem)] relative">
+          {/* 3D Sphere (takes full screen on mobile) */}
+          <div className="flex-grow w-full">
+            <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '60vh' }}>
+              <Suspense fallback={
+                <div className="text-center p-4 w-full h-full flex items-center justify-center min-h-[60vh]">
+                  <div className="animate-pulse">Loading 3D visualization...</div>
+                </div>
+              }>
+                {typeof window !== 'undefined' && window.THREE ? (
+                  <Sphere3D isProcessing={isProcessing} />
+                ) : (
+                  <div className="text-center p-4">Three.js not initialized</div>
+                )}
+              </Suspense>
+            </div>
+          </div>
+          
+          {/* Expandable chat interface */}
+          <div 
+            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0`}
+            style={{
+              height: chatExpanded ? '60vh' : '4rem',
+              boxShadow: `0 -5px 20px ${moodColor}20`,
+              borderColor: moodColor + '30'
+            }}
+          >
+            {/* Chat toggle button */}
+            <button 
+              className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-background rounded-t-xl border flex items-center justify-center shadow-md"
+              onClick={() => setChatExpanded(!chatExpanded)}
+              style={{ borderColor: moodColor + '30' }}
+            >
+              {chatExpanded ? <ChevronDown /> : <ChevronUp />}
+            </button>
+            
+            {/* Collapsed state shows minimal UI */}
+            {!chatExpanded ? (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-muted-foreground">Tap to chat with Neura</p>
+              </div>
+            ) : (
+              <div className="flex flex-col h-full">
+                {/* Chat messages */}
+                <ScrollArea className="flex-1 p-4 overflow-auto">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} `}
+                      >
+                        <div
+                          className={`max-w-[80%] rounded-2xl p-3 animate-in fade-in slide-in-from-${message.sender === 'user' ? 'right' : 'left'} duration-300`}
+                          style={{
+                            background: message.sender === 'user' 
+                              ? `linear-gradient(135deg, ${moodColor}, ${moodColor}99)`
+                              : 'rgba(var(--secondary), 0.3)',
+                            backdropFilter: 'blur(8px)',
+                            boxShadow: `0 2px 10px ${message.sender === 'user' ? moodColor + '40' : 'rgba(0,0,0,0.1)'}`
+                          }}
+                        >
+                          <p className={message.sender === 'user' ? 'text-white' : ''}>{message.text}</p>
+                          <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'opacity-70'}`}>
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+                
+                {/* Input area */}
+                <form onSubmit={handleSendMessage} className="p-4 border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
+                  <div className="flex space-x-2">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Type your message..."
+                      className="flex-1 rounded-full bg-secondary/30 backdrop-blur-sm border-0 focus-visible:ring-1 focus-visible:ring-offset-0"
+                      disabled={isProcessing}
+                    />
+                    <Button 
+                      type="submit" 
+                      disabled={isProcessing || input.trim() === ''} 
+                      className="rounded-full"
+                      style={{ 
+                        background: moodColor,
+                        boxShadow: `0 0 10px ${moodColor}40`
+                      }}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {isProcessing && (
+                    <p className="text-xs text-muted-foreground mt-2 animate-pulse">Neura is thinking...</p>
+                  )}
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Desktop layout
   return (
     <Layout>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[70vh]">
         {/* 3D Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
-          <Card className="w-full h-full overflow-hidden rounded-xl shadow-lg border flex items-center justify-center">
+          <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>
             <Suspense fallback={
               <div className="text-center p-4 w-full h-full flex items-center justify-center">
                 <div className="animate-pulse">Loading 3D visualization...</div>
@@ -144,72 +264,63 @@ const ChatPage = () => {
         
         {/* Chat Interface */}
         <div className="w-full md:w-1/2 flex flex-col">
-          <Card className="flex-1 rounded-xl shadow-lg border flex flex-col">
+          <Card className="flex-1 rounded-xl shadow-xl border-0 glassmorphism flex flex-col" style={{ boxShadow: `0 10px 30px ${moodColor}20` }}>
             {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.sender === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground border border-border'
-                    }`}
-                    style={{
-                      borderColor: message.sender === 'ai' ? moodColor : undefined,
-                    }}
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <p>{message.text}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    <div
+                      className={`max-w-[80%] rounded-2xl p-3 hover:shadow-lg transition-shadow animate-in fade-in slide-in-from-${message.sender === 'user' ? 'right' : 'left'} duration-300`}
+                      style={{
+                        background: message.sender === 'user' 
+                          ? `linear-gradient(135deg, ${moodColor}, ${moodColor}99)`
+                          : 'rgba(var(--secondary), 0.3)',
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: `0 2px 10px ${message.sender === 'user' ? moodColor + '40' : 'rgba(0,0,0,0.1)'}`
+                      }}
+                    >
+                      <p className={message.sender === 'user' ? 'text-white' : ''}>{message.text}</p>
+                      <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'opacity-70'}`}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
             
             {/* Input area */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-border">
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
               <div className="flex space-x-2">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1"
+                  className="flex-1 rounded-full bg-secondary/30 backdrop-blur-sm border-0 focus-visible:ring-1 focus-visible:ring-offset-0"
                   disabled={isProcessing}
                 />
-                <Button type="submit" disabled={isProcessing || input.trim() === ''}>
+                <Button 
+                  type="submit" 
+                  disabled={isProcessing || input.trim() === ''} 
+                  className="rounded-full hover-scale"
+                  style={{ 
+                    background: moodColor,
+                    boxShadow: `0 0 10px ${moodColor}40`
+                  }}
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
               {isProcessing && (
-                <p className="text-xs text-muted-foreground mt-2">Neura is thinking...</p>
+                <p className="text-xs text-muted-foreground mt-2 animate-pulse">Neura is thinking...</p>
               )}
             </form>
           </Card>
-          
-          {/* Mood indicator */}
-          <div className="flex items-center justify-center space-x-3 mt-4">
-            <span className="text-sm">Current Mood:</span>
-            <div className="flex space-x-1">
-              {(['neutral', 'happy', 'sad', 'excited', 'angry'] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMood(m)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    mood === m ? 'scale-110 border-primary' : 'border-transparent'
-                  }`}
-                  style={{ backgroundColor: moodColors[m] }}
-                  title={m.charAt(0).toUpperCase() + m.slice(1)}
-                  aria-label={`Set mood to ${m}`}
-                />
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </Layout>
