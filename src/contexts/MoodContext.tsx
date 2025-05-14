@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import * as React from 'react';
 
 type Mood = 'neutral' | 'happy' | 'sad' | 'excited' | 'angry';
 
@@ -9,7 +9,7 @@ interface MoodContextType {
   moodColor: string;
 }
 
-const MoodContext = createContext<MoodContextType | undefined>(undefined);
+const MoodContext = React.createContext<MoodContextType | undefined>(undefined);
 
 export const moodColors = {
   neutral: '#9f9ea1',
@@ -20,10 +20,10 @@ export const moodColors = {
 };
 
 export const MoodProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mood, setMood] = useState<Mood>('neutral');
-  const [moodColor, setMoodColor] = useState<string>(moodColors.neutral);
+  const [mood, setMood] = React.useState<Mood>('neutral');
+  const [moodColor, setMoodColor] = React.useState<string>(moodColors.neutral);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setMoodColor(moodColors[mood]);
   }, [mood]);
 
@@ -35,7 +35,7 @@ export const MoodProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useMood = () => {
-  const context = useContext(MoodContext);
+  const context = React.useContext(MoodContext);
   if (context === undefined) {
     throw new Error('useMood must be used within a MoodProvider');
   }
