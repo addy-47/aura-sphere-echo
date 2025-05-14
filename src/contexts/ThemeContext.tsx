@@ -27,8 +27,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const applyTheme = (newTheme: Theme) => {
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      document.body.style.backgroundColor = '#000';
+      document.body.style.color = '#fff';
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
     }
     localStorage.setItem('theme', newTheme);
   };
