@@ -41,7 +41,7 @@ const Index = () => {
           
           {/* Enhanced 3D Sphere representation with improved shadow */}
           <div 
-            className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-8 md:mb-10 relative sphere-shadow z-20 cursor-pointer transition-all duration-500"
+            className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-8 md:mb-10 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105"
             style={{ 
               background: theme === 'dark' 
                 ? 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%)' 
@@ -91,7 +91,8 @@ const Index = () => {
           </Link>
           
           {/* Add custom CSS for the button animations */}
-          <style jsx="true">{`
+          <style>
+            {`
             .perspective {
               perspective: 500px;
             }
@@ -152,7 +153,8 @@ const Index = () => {
                 transform: translateY(-50%);
               }
             }
-          `}</style>
+            `}
+          </style>
         </div>
       </div>
     </Layout>
