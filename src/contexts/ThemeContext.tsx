@@ -24,31 +24,27 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     applyTheme(initialTheme);
   }, []);
 
-  // Apply theme when it changes
-  React.useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
   const applyTheme = (newTheme: Theme) => {
-    const root = document.documentElement;
-    
     if (newTheme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
       document.body.style.backgroundColor = '#000';
       document.body.style.color = '#fff';
     } else {
-      root.classList.remove('dark');
-      root.classList.add('light');
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
       document.body.style.backgroundColor = '#fff';
       document.body.style.color = '#000';
     }
-    
     localStorage.setItem('theme', newTheme);
   };
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
+      applyTheme(newTheme);
+      return newTheme;
+    });
   };
 
   return (

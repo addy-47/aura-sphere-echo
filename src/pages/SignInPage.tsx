@@ -5,53 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Facebook, Github, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import Layout from '../components/Layout';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Prevent double submission
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      // Simulate auth - in a real app, you would connect to an auth service
-      console.log('Signing in with:', email, password);
-      
-      // Store user info in localStorage to simulate login
-      localStorage.setItem('user', JSON.stringify({
-        email,
-        name: email.split('@')[0],
-        isAuthenticated: true
-      }));
-      
-      toast({
-        title: "Success!",
-        description: "You have been signed in.",
-      });
-      
-      // Navigate after successful login
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Sign in failed:', error);
-      toast({
-        title: "Sign in failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // For demonstration purposes, just navigate to dashboard
+    navigate('/dashboard');
   };
 
   return (
@@ -98,7 +63,7 @@ const SignInPage = () => {
               <form onSubmit={handleSignIn}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium leading-none">
+                    <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Email
                     </label>
                     <Input
@@ -109,11 +74,10 @@ const SignInPage = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium leading-none">
+                    <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Password
                     </label>
                     <div className="relative">
@@ -124,7 +88,6 @@ const SignInPage = () => {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        disabled={isSubmitting}
                       />
                       <Button
                         type="button"
@@ -132,15 +95,14 @@ const SignInPage = () => {
                         size="icon"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
-                        disabled={isSubmitting}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                       </Button>
                     </div>
                   </div>
-                  <Button className="w-full" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Signing in..." : "Sign In"}
+                  <Button className="w-full" type="submit">
+                    Sign In
                   </Button>
                 </div>
               </form>
