@@ -1,26 +1,55 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings, MessageCircle, User, Home, Menu, X, Github, Facebook, Mail } from 'lucide-react';
+import { Sun, Moon, Settings, MessageCircle, User, Home, Menu, X, Github, Facebook, Mail, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
 import Logo from './Logo';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { useToast } from '@/hooks/use-toast';
+
+interface UserInfo {
+  name: string;
+  email: string;
+  isAuthenticated: boolean;
+}
 
 interface LayoutProps {
   children: React.ReactNode;
   minimal?: boolean;
-  isAuthenticated?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthenticated = false }) => {
+const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
   const { theme, toggleTheme } = useTheme();
   const { moodColor } = useMood();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  
+  useEffect(() => {
+    // Check for user in localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user data', e);
+      }
+    }
+  }, [location.pathname]); // Re-check when path changes
+  
+  const isAuthenticated = !!user?.isAuthenticated;
   
   // Define nav items based on authentication status
   const navItems = isAuthenticated 
@@ -36,14 +65,34 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthentica
         { path: '/customize', icon: <Settings className="h-5 w-5" />, label: 'Customize' },
       ];
 
+  const handleSignOut = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+    
+    navigate('/');
+  };
+
+  // Don't show footer in mobile chat view
+  const shouldShowFooter = !(isMobile && location.pathname === '/chat');
+
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
+      {/* Stars background layers */}
+      <div className="stars-small fixed inset-0 z-0 pointer-events-none"></div>
+      <div className="stars-medium fixed inset-0 z-0 pointer-events-none"></div>
+      <div className="stars-large fixed inset-0 z-0 pointer-events-none"></div>
+      
       <header 
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/70 transition-all border-b border-white/10"
       >
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <Link to="/" className="hover-scale flex items-center">
+            <Link to="/" className="hover-scale flex items-center gap-2">
               <Logo withText />
             </Link>
             
@@ -78,7 +127,38 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthentica
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
               
-              {!isAuthenticated && (
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="border-white/10 hover:bg-white/10 rounded-full text-white flex gap-2 items-center"
+                    >
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">{user?.name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-black/90 backdrop-blur-lg border-white/10">
+                    <div className="px-3 py-2 text-sm font-medium text-white">
+                      {user?.email}
+                    </div>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/dashboard')}>
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/customize')}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem className="cursor-pointer text-red-500" onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
                 <Button 
                   onClick={() => navigate('/signin')}
                   variant="outline" 
@@ -103,7 +183,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthentica
           
           {/* Mobile dropdown menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-3 p-3 rounded-lg backdrop-blur-xl bg-black/70 animate-in fade-in slide-in-from-top">
+            <div className="md:hidden mt-3 p-3 rounded-lg backdrop-blur-xl bg-black/90 animate-in fade-in slide-in-from-top">
               <nav className="flex flex-col gap-2">
                 {navItems.map((item) => (
                   <Link 
@@ -121,7 +201,15 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthentica
                   </Link>
                 ))}
                 
-                {!isAuthenticated && (
+                {isAuthenticated ? (
+                  <Button 
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 mt-2 justify-start bg-transparent hover:bg-white/10 text-red-500"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Sign out
+                  </Button>
+                ) : (
                   <Link 
                     to="/signin"
                     className="flex items-center gap-2 p-2 mt-2 bg-white/10 rounded-lg text-white font-medium"
@@ -140,63 +228,63 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, isAuthentica
       <div className="pt-16 md:pt-20"></div>
       
       <main className="flex-1 min-h-[calc(100vh-16rem)] px-4 md:container md:mx-auto">
-        <div className="py-6">
+        <div className="py-8">
           {children}
         </div>
       </main>
       
-      <footer 
-        className="border-t border-white/10 py-10 bg-black mt-12"
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex flex-col items-center md:items-start">
-              <Logo size="md" />
-              <p className="mt-2 text-gray-400 text-sm">
-                Your digital doppelganger that grows with you
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+      {shouldShowFooter && (
+        <footer className="border-t border-white/10 py-10 bg-black/80 backdrop-blur-md mt-12">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex flex-col items-center md:items-start">
-                <h3 className="font-semibold mb-3 text-white">Platform</h3>
-                <ul className="space-y-2">
-                  <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
-                  <li><Link to="/chat" className="text-gray-400 hover:text-white transition-colors">Chat</Link></li>
-                  <li><Link to="/customize" className="text-gray-400 hover:text-white transition-colors">Customize</Link></li>
-                </ul>
+                <Logo size="md" />
+                <p className="mt-2 text-gray-400 text-sm">
+                  Your digital doppelganger that grows with you
+                </p>
               </div>
               
-              <div className="flex flex-col items-center md:items-start">
-                <h3 className="font-semibold mb-3 text-white">Legal</h3>
-                <ul className="space-y-2">
-                  <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
-                  <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
-                </ul>
-              </div>
-              
-              <div className="flex flex-col items-center md:items-start col-span-2 md:col-span-1">
-                <h3 className="font-semibold mb-3 text-white">Connect</h3>
-                <div className="flex gap-4">
-                  <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
-                    <Facebook size={20} />
-                  </a>
-                  <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-                  </a>
-                  <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
-                    <Github size={20} />
-                  </a>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                <div className="flex flex-col items-center md:items-start">
+                  <h3 className="font-semibold mb-3 text-white">Platform</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
+                    <li><Link to="/chat" className="text-gray-400 hover:text-white transition-colors">Chat</Link></li>
+                    <li><Link to="/customize" className="text-gray-400 hover:text-white transition-colors">Customize</Link></li>
+                  </ul>
+                </div>
+                
+                <div className="flex flex-col items-center md:items-start">
+                  <h3 className="font-semibold mb-3 text-white">Legal</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
+                    <li><Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
+                  </ul>
+                </div>
+                
+                <div className="flex flex-col items-center md:items-start col-span-2 md:col-span-1">
+                  <h3 className="font-semibold mb-3 text-white">Connect</h3>
+                  <div className="flex gap-4">
+                    <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
+                      <Facebook size={20} />
+                    </a>
+                    <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+                    </a>
+                    <a href="#" className="rounded-full p-2 bg-white/5 hover:bg-white/10 transition-colors text-gray-400">
+                      <Github size={20} />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
+            
+            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
+              <p>© {new Date().getFullYear()} Neura AI. All rights reserved.</p>
+            </div>
           </div>
-          
-          <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
-            <p>© {new Date().getFullYear()} Neura AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
       
       {/* Only show mobile bottom nav if not on chat page or we're on chat page but not mobile */}
       {(location.pathname !== '/chat' || !isMobile) && (

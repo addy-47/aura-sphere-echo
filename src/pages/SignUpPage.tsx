@@ -5,30 +5,75 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Facebook, Github, Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import Layout from '../components/Layout';
 
 const SignUpPage = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For demonstration purposes, just navigate to dashboard
-    navigate('/dashboard');
+    
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
+    // Basic validation
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please ensure both passwords match.",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    
+    try {
+      // Simulate registration - in a real app, you would connect to an auth service
+      console.log('Registering with:', email, password);
+      
+      // Store user info in localStorage to simulate registration
+      localStorage.setItem('user', JSON.stringify({
+        email,
+        name: name || email.split('@')[0],
+        isAuthenticated: true
+      }));
+      
+      toast({
+        title: "Account created!",
+        description: "Your account has been created successfully.",
+      });
+      
+      // Navigate after successful registration
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Sign up failed:', error);
+      toast({
+        title: "Sign up failed",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
+      <div className="container mx-auto px-4 py-10 flex items-center justify-center">
         <div className="w-full max-w-md">
           <Card className="border-white/5 bg-black/30 backdrop-blur-lg">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
               <CardDescription className="text-center">
-                Enter your information below to create your account
+                Enter your details below to create your account
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -64,21 +109,21 @@ const SignUpPage = () => {
               <form onSubmit={handleSignUp}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Full Name
+                    <label htmlFor="name" className="text-sm font-medium leading-none">
+                      Name
                     </label>
                     <Input
                       id="name"
                       type="text" 
                       placeholder="John Doe"
                       className="bg-white/5 border-white/10 focus:border-white/20"
-                      required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label htmlFor="email" className="text-sm font-medium leading-none">
                       Email
                     </label>
                     <Input
@@ -89,10 +134,11 @@ const SignUpPage = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label htmlFor="password" className="text-sm font-medium leading-none">
                       Password
                     </label>
                     <div className="relative">
@@ -103,6 +149,7 @@ const SignUpPage = () => {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={isSubmitting}
                       />
                       <Button
                         type="button"
@@ -110,14 +157,29 @@ const SignUpPage = () => {
                         size="icon"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isSubmitting}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                       </Button>
                     </div>
                   </div>
-                  <Button className="w-full" type="submit">
-                    Create Account
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
+                      Confirm Password
+                    </label>
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      className="bg-white/5 border-white/10 focus:border-white/20"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <Button className="w-full" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Creating account..." : "Sign Up"}
                   </Button>
                 </div>
               </form>

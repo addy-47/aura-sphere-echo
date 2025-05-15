@@ -28,7 +28,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, monochrome = 
       <div 
         className={`relative rounded-full overflow-hidden ${sizeClasses[size]}`}
         style={{ 
-          background: 'linear-gradient(135deg, #333333, #1a1a1a)',
+          background: 'linear-gradient(135deg, #2a2a2a, #1a1a1a)',
           boxShadow: '0 0 15px rgba(255,255,255,0.1)'
         }}
       >
