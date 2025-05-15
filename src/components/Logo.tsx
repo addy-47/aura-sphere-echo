@@ -35,7 +35,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, monochrome = 
         <div 
           className="absolute inset-0 bg-black rounded-full flex items-center justify-center"
         >
-          {/* Brain logo SVG in monochrome */}
+          {/* Brain logo SVG in monochrome - consistent in both dark and light mode */}
           <svg width="80%" height="80%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="white" strokeOpacity="0.7" strokeWidth="1" fill="black" />
             <path d="M12 6C11.1 6 10.3 6.3 9.7 6.9C9.3 7.3 9.1 7.9 9 8.5C8.1 8.9 7.5 9.9 7.5 11C7.5 11.8 7.9 12.6 8.5 13C8.1 13.4 8 14 8 14.5C8 15.9 9.1 17 10.5 17H15C16.7 17 18 15.7 18 14C18 13.1 17.6 12.3 17 11.7C17.6 11.1 18 10.1 18 9C18 7.3 16.7 6 15 6H12Z" stroke="white" strokeWidth="1" fill="#333333" />
@@ -48,7 +48,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, monochrome = 
       </div>
       
       {withText && (
-        <span className={`font-light ${textSizes[size]} tracking-widest text-white uppercase`}>
+        <span className={`font-light ${textSizes[size]} tracking-widest ${textSizes[size]} text-current uppercase`}>
           Neura
         </span>
       )}
