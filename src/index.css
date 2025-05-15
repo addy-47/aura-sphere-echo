@@ -5,6 +5,38 @@
 
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
 
@@ -35,36 +67,6 @@
 
     --radius: 0.75rem;
   }
-
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 0%;
-
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 40%;
-
-    --accent: 0 0% 95%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
-  }
 }
 
 @layer base {
@@ -78,8 +80,16 @@
     position: relative;
   }
   
+  body.dark {
+    @apply bg-black text-white;
+  }
+  
+  body.light {
+    @apply bg-white text-black;
+  }
+  
   /* Stars background - enhanced and always visible */
-  body::before {
+  .stars-background {
     content: '';
     position: fixed;
     top: 0;
@@ -144,7 +154,7 @@
   }
 
   /* Deep space gradient */
-  body::after {
+  .space-gradient {
     content: '';
     position: fixed;
     top: 0;
@@ -205,12 +215,25 @@
   /* Deep space sphere shadow */
   .sphere-shadow {
     box-shadow: 0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1);
-    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transition: box-shadow 0.5s ease-in-out, transform 0.5s ease-in-out;
   }
   
   .sphere-shadow:hover {
     box-shadow: 0 0 100px rgba(255, 255, 255, 0.3), inset 0 0 60px rgba(255, 255, 255, 0.2);
-    transform: scale(1.02);
+    transform: scale(1.05) rotate(5deg);
+  }
+
+  /* Light mode versions of the effects */
+  .light .sphere-shadow {
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.1), inset 0 0 40px rgba(0, 0, 0, 0.05);
+  }
+  
+  .light .sphere-shadow:hover {
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.15), inset 0 0 60px rgba(0, 0, 0, 0.1);
+  }
+  
+  .light .shadow-glow {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   }
 }
 
