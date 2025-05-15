@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Facebook, Github, Eye, EyeOff } from 'lucide-react';
+import { Facebook, Eye, EyeOff } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useTheme } from '../contexts/ThemeContext';
 import { toast } from 'sonner';
@@ -17,7 +17,7 @@ const SignInPage = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -27,21 +27,32 @@ const SignInPage = () => {
     
     setIsLoading(true);
     
-    // Simulate authentication process
-    setTimeout(() => {
-      // Store user info in session storage
-      sessionStorage.setItem('user', JSON.stringify({ email }));
+    try {
+      // Store user info in session storage in a single operation
+      sessionStorage.setItem('user', JSON.stringify({ 
+        email, 
+        isAuthenticated: true,
+        name: email.split('@')[0] // Simple name extraction from email
+      }));
+      
+      // Show success message
       toast.success('Successfully signed in!');
-      navigate('/dashboard');
+      
+      // Navigate to homepage
+      navigate('/');
+    } catch (error) {
+      toast.error('Sign in failed. Please try again.');
+      console.error('Sign in error:', error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12 flex items-center justify-center">
         <div className="w-full max-w-md">
-          <Card className={`${theme === 'dark' ? 'border-white/5 bg-black/30' : 'border-black/5 bg-white/80'} backdrop-blur-lg`}>
+          <Card className={`${theme === 'dark' ? 'border-white/5 bg-black/30' : 'border-black/5 bg-white/90'} backdrop-blur-lg`}>
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
               <CardDescription className="text-center">

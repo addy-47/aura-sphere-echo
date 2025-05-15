@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -124,11 +123,6 @@ const ChatPage = () => {
     };
     
     setMessages((prev) => [...prev, aiMessage]);
-    
-    // Expand chat on mobile when a message is sent
-    if (isMobile && !chatExpanded) {
-      setChatExpanded(true);
-    }
   };
 
   // Special layout for mobile chat page
@@ -171,14 +165,18 @@ const ChatPage = () => {
               {chatExpanded ? <ChevronDown /> : <ChevronUp />}
             </button>
             
-            {/* Collapsed state shows minimal UI */}
-            {!chatExpanded ? (
-              <div className="h-full flex items-center justify-center">
-                <p className="text-muted-foreground">Tap to chat with Neura</p>
-              </div>
-            ) : (
-              <div className="flex flex-col h-full">
-                {/* Chat messages */}
+            {/* Always show input form and current message */}
+            <div className="flex flex-col h-full">
+              {/* Collapsed state shows minimal UI with latest message */}
+              {!chatExpanded ? (
+                <div className="h-full flex items-center justify-between px-4">
+                  <div className="truncate flex-1 text-sm">
+                    {messages.length > 0 && messages[messages.length - 1].text.length > 50 
+                      ? `${messages[messages.length - 1].text.substring(0, 50)}...` 
+                      : messages[messages.length - 1].text}
+                  </div>
+                </div>
+              ) : (
                 <ScrollArea className="flex-1 p-4 overflow-auto">
                   <div className="space-y-4">
                     {messages.map((message) => (
@@ -206,42 +204,42 @@ const ChatPage = () => {
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
-                
-                {/* Input area */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
-                  <div className="flex space-x-2">
-                    <Input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Type your message..."
-                      className="flex-1 rounded-full bg-secondary/30 backdrop-blur-sm border-0 focus-visible:ring-1 focus-visible:ring-offset-0"
-                      disabled={isProcessing}
-                    />
-                    <Button 
-                      type="submit" 
-                      disabled={isProcessing || input.trim() === ''} 
-                      className="rounded-full"
-                      style={{ 
-                        background: moodColor,
-                        boxShadow: `0 0 10px ${moodColor}40`
-                      }}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {isProcessing && (
-                    <p className="text-xs text-muted-foreground mt-2 animate-pulse">Neura is thinking...</p>
-                  )}
-                </form>
-              </div>
-            )}
+              )}
+              
+              {/* Always visible input area */}
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
+                <div className="flex space-x-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1 rounded-full bg-secondary/30 backdrop-blur-sm border-0 focus-visible:ring-1 focus-visible:ring-offset-0"
+                    disabled={isProcessing}
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={isProcessing || input.trim() === ''} 
+                    className="rounded-full"
+                    style={{ 
+                      background: moodColor,
+                      boxShadow: `0 0 10px ${moodColor}40`
+                    }}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+                {isProcessing && (
+                  <p className="text-xs text-muted-foreground mt-2 animate-pulse">Neura is thinking...</p>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       </Layout>
     );
   }
 
-  // Desktop layout
+  // Desktop layout - keep unchanged
   return (
     <Layout>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[70vh]">
