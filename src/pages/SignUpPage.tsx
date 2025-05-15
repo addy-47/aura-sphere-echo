@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Facebook, Github, Eye, EyeOff } from 'lucide-react';
 import Layout from '../components/Layout';
 
-const SignInPage = () => {
+const SignUpPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     // For demonstration purposes, just navigate to dashboard
     navigate('/dashboard');
@@ -25,9 +26,9 @@ const SignInPage = () => {
         <div className="w-full max-w-md">
           <Card className="border-white/5 bg-black/30 backdrop-blur-lg">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
+              <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
               <CardDescription className="text-center">
-                Enter your email below to sign in to your account
+                Enter your information below to create your account
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -60,8 +61,22 @@ const SignInPage = () => {
                   <span className="bg-black px-2 text-gray-400">Or continue with</span>
                 </div>
               </div>
-              <form onSubmit={handleSignIn}>
+              <form onSubmit={handleSignUp}>
                 <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Full Name
+                    </label>
+                    <Input
+                      id="name"
+                      type="text" 
+                      placeholder="John Doe"
+                      className="bg-white/5 border-white/10 focus:border-white/20"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Email
@@ -102,16 +117,16 @@ const SignInPage = () => {
                     </div>
                   </div>
                   <Button className="w-full" type="submit">
-                    Sign In
+                    Create Account
                   </Button>
                 </div>
               </form>
             </CardContent>
             <CardFooter className="flex flex-col">
               <div className="text-sm text-gray-400 text-center">
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <Button variant="link" className="p-0 h-auto text-white" asChild>
-                  <Link to="/signup">Sign Up</Link>
+                  <Link to="/signin">Sign In</Link>
                 </Button>
               </div>
             </CardFooter>
@@ -122,4 +137,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default SignUpPage;

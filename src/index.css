@@ -78,7 +78,7 @@
     position: relative;
   }
   
-  /* Stars background */
+  /* Stars background - enhanced and always visible */
   body::before {
     content: '';
     position: fixed;
@@ -89,9 +89,58 @@
     background-image: radial-gradient(#ffffff 1px, transparent 1px);
     background-size: 50px 50px;
     background-position: 0 0;
-    opacity: 0.15;
+    opacity: 0.2;
     pointer-events: none;
     z-index: 0;
+  }
+
+  /* Additional star layers for parallax effect */
+  .stars-small {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px);
+    background-size: 30px 30px;
+    opacity: 0.1;
+    z-index: 0;
+    pointer-events: none;
+    animation: stars-float-small 150s linear infinite;
+  }
+
+  .stars-medium {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(#ffffff 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+    animation: stars-float-medium 200s linear infinite;
+  }
+
+  .stars-large {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+    background-size: 80px 80px;
+    opacity: 0.1;
+    z-index: 0;
+    pointer-events: none;
+    animation: stars-float-large 250s linear reverse infinite;
+  }
+
+  @keyframes stars-float-small {
+    0% { background-position: 0 0; }
+    100% { background-position: 500px 500px; }
+  }
+
+  @keyframes stars-float-medium {
+    0% { background-position: 0 0; }
+    100% { background-position: 1000px 1000px; }
+  }
+
+  @keyframes stars-float-large {
+    0% { background-position: 0 0; }
+    100% { background-position: 1500px 1500px; }
   }
 
   /* Deep space gradient */
@@ -156,6 +205,12 @@
   /* Deep space sphere shadow */
   .sphere-shadow {
     box-shadow: 0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1);
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+  
+  .sphere-shadow:hover {
+    box-shadow: 0 0 100px rgba(255, 255, 255, 0.3), inset 0 0 60px rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
   }
 }
 

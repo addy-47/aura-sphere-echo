@@ -12,7 +12,8 @@ import DashboardPage from "./pages/DashboardPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
-import SignInPage from "./pages/SignInPage"; 
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 import { MoodProvider } from "./contexts/MoodContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/signin" element={<SignInPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

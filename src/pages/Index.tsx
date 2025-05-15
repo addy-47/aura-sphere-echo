@@ -12,7 +12,7 @@ const Index = () => {
   
   return (
     <Layout minimal>
-      <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 py-20 bg-black relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] text-center px-4 py-10 bg-black relative overflow-hidden">
         {/* Starry background effect with CSS */}
         <div className="absolute inset-0 overflow-hidden z-0" 
           style={{
@@ -22,21 +22,21 @@ const Index = () => {
           }}
         />
         
-        <div className="max-w-4xl mx-auto flex flex-col items-center pt-16 sm:pt-24 z-10">
+        <div className="max-w-4xl mx-auto flex flex-col items-center z-10">
           {/* Main Hero Text */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tighter mb-6 sm:mb-8 text-white">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter mb-4 sm:mb-6 text-white">
             Your Digital
             <br />
             <span className="gradient-text from-gray-100 to-gray-400 animate-gradient font-normal">Doppelgänger</span>
           </h1>
           
-          <p className="text-lg md:text-2xl text-gray-400 mb-12 md:mb-16 max-w-xl">
+          <p className="text-lg md:text-xl text-gray-400 mb-8 md:mb-10 max-w-xl">
             An AI-powered digital reflection that evolves with your personality
           </p>
           
           {/* 3D Sphere representation with enhanced shadow */}
           <div 
-            className="w-64 h-64 md:w-72 md:h-72 rounded-full mb-12 md:mb-16 relative sphere-shadow"
+            className="w-52 h-52 md:w-64 md:h-64 rounded-full mb-8 md:mb-10 relative sphere-shadow z-20 cursor-pointer transition-all duration-300 hover:shadow-[0_0_100px_rgba(255,255,255,0.3)]"
             style={{ 
               background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
               boxShadow: '0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1)'
@@ -54,7 +54,7 @@ const Index = () => {
           <Button 
             asChild 
             size="lg" 
-            className="rounded-full w-64 h-16 text-lg bg-white text-black hover:bg-gray-200 shadow-glow transition-all duration-300 flex items-center gap-2"
+            className="rounded-full w-64 h-16 text-lg bg-white text-black hover:scale-105 hover:bg-gray-200 shadow-glow transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <Link to="/signin">
               Get Started <ArrowRight size={20} />
