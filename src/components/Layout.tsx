@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
       <header className={`${minimal ? 'py-4' : 'py-6'} px-4 border-b transition-all ${theme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}>
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
-            <Logo size={32} />
+            <Logo size="md" />
             <span className={`text-xl font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Neura</span>
           </Link>
 
@@ -65,7 +65,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
           <div className="container mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2">
-                <Logo size={24} />
+                <Logo size="sm" />
                 <span className="text-sm font-medium">Neura</span>
               </div>
               
