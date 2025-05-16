@@ -74,21 +74,38 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
       {/* Header */}
       <header className={`${minimal ? 'py-4' : 'py-6'} px-4 border-b transition-all ${theme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}>
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo size="md" withText={!isMobile} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center">
+              <Logo size="md" withText={false} />
+            </Link>
+          </div>
 
-          {/* Desktop navigation */}
+          {/* Desktop navigation - centered */}
           <nav className="hidden md:flex items-center justify-center flex-1">
-            <div className="flex items-center gap-6">
-              <Link to="/" className={`text-sm ${location.pathname === '/' ? 'font-medium' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}>Home</Link>
-              <Link to="/chat" className={`text-sm ${location.pathname === '/chat' ? 'font-medium' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}>Chat</Link>
-              <Link to="/customize" className={`text-sm ${location.pathname === '/customize' ? 'font-medium' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}>Customize</Link>
+            <div className="flex items-center gap-8 mx-auto">
+              <Link 
+                to="/" 
+                className={`text-sm font-medium ${location.pathname === '/' ? 'text-primary' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/chat" 
+                className={`text-sm font-medium ${location.pathname === '/chat' ? 'text-primary' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}
+              >
+                Chat
+              </Link>
+              <Link 
+                to="/customize" 
+                className={`text-sm font-medium ${location.pathname === '/customize' ? 'text-primary' : 'text-opacity-80'} transition-colors hover:text-opacity-100`}
+              >
+                Customize
+              </Link>
             </div>
           </nav>
 
           <div className="flex items-center gap-4">
-            {/* Mobile menu */}
+            {/* Mobile menu - improved */}
             {isMobile && (
               <Sheet>
                 <SheetTrigger asChild>
@@ -96,20 +113,51 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[240px]">
-                  <div className="flex flex-col gap-6 mt-10">
-                    <Link to="/" className={`flex items-center gap-2 px-2 py-2 rounded-md ${location.pathname === '/' ? 'bg-muted font-medium' : ''}`}>
+                <SheetContent side="left" className="w-[240px] pt-10">
+                  <div className="flex flex-col gap-6 mt-6">
+                    <div className="flex items-center justify-center mb-8">
+                      <Logo size="md" withText={true} />
+                    </div>
+                    <Link 
+                      to="/" 
+                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
+                        ${location.pathname === '/' ? 'bg-primary text-primary-foreground' : ''}`}
+                    >
                       Home
                     </Link>
-                    <Link to="/chat" className={`flex items-center gap-2 px-2 py-2 rounded-md ${location.pathname === '/chat' ? 'bg-muted font-medium' : ''}`}>
+                    <Link 
+                      to="/chat" 
+                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
+                        ${location.pathname === '/chat' ? 'bg-primary text-primary-foreground' : ''}`}
+                    >
                       Chat
                     </Link>
-                    <Link to="/customize" className={`flex items-center gap-2 px-2 py-2 rounded-md ${location.pathname === '/customize' ? 'bg-muted font-medium' : ''}`}>
+                    <Link 
+                      to="/customize" 
+                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
+                        ${location.pathname === '/customize' ? 'bg-primary text-primary-foreground' : ''}`}
+                    >
                       Customize
                     </Link>
-                    <Link to="/dashboard" className={`flex items-center gap-2 px-2 py-2 rounded-md ${location.pathname === '/dashboard' ? 'bg-muted font-medium' : ''}`}>
+                    <Link 
+                      to="/dashboard" 
+                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
+                        ${location.pathname === '/dashboard' ? 'bg-primary text-primary-foreground' : ''}`}
+                    >
                       Dashboard
                     </Link>
+                    
+                    <div className="mt-auto pt-6 border-t border-border flex justify-center">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={toggleTheme} 
+                        className="rounded-full"
+                      >
+                        {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                        <span className="ml-2">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                      </Button>
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
@@ -135,13 +183,12 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         {children}
       </main>
 
-      {/* Footer */}
+      {/* Footer - centered alignment */}
       <footer className="py-6 px-4 border-t mt-auto">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="flex items-center gap-2 mb-2">
               <Logo size="sm" withText={false} />
-              <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>NEURA</span>
             </div>
             
             <div className="flex gap-6 text-sm justify-center">
@@ -149,7 +196,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
               <Link to="/terms" className="hover:underline">Terms of Service</Link>
             </div>
             
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground mt-1">
               © 2025 Neura AI. All rights reserved.
             </div>
           </div>

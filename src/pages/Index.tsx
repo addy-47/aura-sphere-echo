@@ -26,8 +26,8 @@ const Index = () => {
         />
         
         <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8">
-          {/* Main Hero Text */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter mb-2">
+          {/* Main Hero Text - Centered */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter mb-2 text-center">
             Your Digital
             <br />
             <span className={`gradient-text ${theme === 'dark' ? 'from-gray-100 to-gray-400' : 'from-gray-700 to-gray-900'} animate-gradient font-normal`}>
@@ -35,17 +35,17 @@ const Index = () => {
             </span>
           </h1>
           
-          <p className={`text-lg md:text-xl ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} max-w-xl`}>
+          <p className={`text-lg md:text-xl ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} max-w-xl text-center mx-auto`}>
             An AI-powered digital reflection that evolves with your personality
           </p>
           
-          {/* Enhanced 3D Sphere representation with improved shadow */}
-          <div className="my-12">
+          {/* Enhanced 3D Sphere representation with consistent color in both themes */}
+          <div className="my-12 flex justify-center items-center w-full">
             <div 
               className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-2 md:mb-4 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105"
               style={{ 
                 background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1a1a1a', // Same dark color for both themes
                 boxShadow: '0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1)'
               }}
             >
@@ -58,7 +58,7 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Get Started Button with hover animation */}
+          {/* Get Started Button - Centered with hover animation */}
           <Link 
             to="/signin" 
             className="mt-16 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-medium
