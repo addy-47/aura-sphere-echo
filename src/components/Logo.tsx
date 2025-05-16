@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useMood } from '../contexts/MoodContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -10,6 +11,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, monochrome = false }) => {
   const { moodColor } = useMood();
+  const { theme } = useTheme();
   
   const sizeClasses = {
     sm: 'h-6 w-6',
