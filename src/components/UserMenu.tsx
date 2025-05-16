@@ -57,6 +57,16 @@ const UserMenu = () => {
     navigate('/');
   };
 
+  const handleDashboardClick = () => {
+    // Check if user is authenticated before navigating to dashboard
+    if (!user) {
+      toast.error("You need to sign in first");
+      navigate('/signin');
+      return;
+    }
+    navigate('/dashboard');
+  };
+
   if (!user) {
     return (
       <div className="flex items-center gap-2">
@@ -89,11 +99,9 @@ const UserMenu = () => {
             <span>Home</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="flex items-center cursor-pointer w-full">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
+        <DropdownMenuItem onClick={handleDashboardClick} className="flex items-center cursor-pointer">
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Dashboard</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-red-500 focus:text-red-500 cursor-pointer">

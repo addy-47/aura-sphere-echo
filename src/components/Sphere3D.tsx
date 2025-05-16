@@ -49,11 +49,14 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
     }
   };
 
+  // Use a consistent dark color regardless of theme
+  const sphereBaseColor = '#1a1a1a';
+
   return (
     <mesh ref={sphereRef}>
       <sphereGeometry args={[1, 64, 64]} />
       <meshStandardMaterial 
-        color={moodColor}
+        color={sphereBaseColor}
         emissive={moodColor}
         emissiveIntensity={getEmissiveIntensity()}
         roughness={0.2}
