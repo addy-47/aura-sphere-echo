@@ -76,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center">
-              <Logo size="md" withText={false} />
+              <Logo size="md" withText={true} />
             </Link>
           </div>
 
@@ -105,57 +105,68 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
           </nav>
 
           <div className="flex items-center gap-4">
-            {/* Mobile menu - improved */}
+            {/* Mobile menu - enhanced */}
             {isMobile && (
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="md:hidden">
+                  <Button variant="outline" size="sm" className="md:hidden flex gap-2 items-center">
                     <Menu className="h-5 w-5" />
+                    <span>Menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[240px] pt-10">
+                <SheetContent side="left" className="w-[280px] pt-10">
                   <div className="flex flex-col gap-6 mt-6">
                     <div className="flex items-center justify-center mb-8">
                       <Logo size="md" withText={true} />
                     </div>
-                    <Link 
-                      to="/" 
-                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
-                        ${location.pathname === '/' ? 'bg-primary text-primary-foreground' : ''}`}
-                    >
-                      Home
-                    </Link>
-                    <Link 
-                      to="/chat" 
-                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
-                        ${location.pathname === '/chat' ? 'bg-primary text-primary-foreground' : ''}`}
-                    >
-                      Chat
-                    </Link>
-                    <Link 
-                      to="/customize" 
-                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
-                        ${location.pathname === '/customize' ? 'bg-primary text-primary-foreground' : ''}`}
-                    >
-                      Customize
-                    </Link>
-                    <Link 
-                      to="/dashboard" 
-                      className={`flex justify-center items-center gap-2 px-2 py-3 rounded-md text-lg 
-                        ${location.pathname === '/dashboard' ? 'bg-primary text-primary-foreground' : ''}`}
-                    >
-                      Dashboard
-                    </Link>
+                    <div className="space-y-1">
+                      <Link 
+                        to="/" 
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium transition-colors
+                          ${location.pathname === '/' 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-secondary/10'}`}
+                      >
+                        Home
+                      </Link>
+                      <Link 
+                        to="/chat" 
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium transition-colors
+                          ${location.pathname === '/chat' 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-secondary/10'}`}
+                      >
+                        Chat
+                      </Link>
+                      <Link 
+                        to="/customize" 
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium transition-colors
+                          ${location.pathname === '/customize' 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-secondary/10'}`}
+                      >
+                        Customize
+                      </Link>
+                      <Link 
+                        to="/dashboard" 
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium transition-colors
+                          ${location.pathname === '/dashboard' 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-secondary/10'}`}
+                      >
+                        Dashboard
+                      </Link>
+                    </div>
                     
-                    <div className="mt-auto pt-6 border-t border-border flex justify-center">
+                    <div className="mt-auto pt-6 border-t border-border">
                       <Button 
                         variant="ghost" 
-                        size="icon" 
+                        size="sm"
                         onClick={toggleTheme} 
-                        className="rounded-full"
+                        className="w-full justify-start rounded-md px-4 py-3 text-base"
                       >
-                        {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                        <span className="ml-2">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                        {theme === 'dark' ? <Sun className="h-5 w-5 mr-2" /> : <Moon className="h-5 w-5 mr-2" />}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                       </Button>
                     </div>
                   </div>
@@ -183,20 +194,23 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         {children}
       </main>
 
-      {/* Footer - centered alignment */}
+      {/* Footer - updated layout */}
       <footer className="py-6 px-4 border-t mt-auto">
         <div className="container mx-auto">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Logo size="sm" withText={false} />
+          <div className="flex flex-wrap items-center justify-between">
+            {/* Logo on the left */}
+            <div className="flex items-center mb-4 sm:mb-0">
+              <Logo size="sm" withText={true} />
             </div>
             
-            <div className="flex gap-6 text-sm justify-center">
+            {/* Links centered */}
+            <div className="flex gap-6 text-sm justify-center mx-auto">
               <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
               <Link to="/terms" className="hover:underline">Terms of Service</Link>
             </div>
             
-            <div className="text-sm text-muted-foreground mt-1">
+            {/* Copyright on the right */}
+            <div className="text-sm text-muted-foreground mt-4 sm:mt-0">
               © 2025 Neura AI. All rights reserved.
             </div>
           </div>
