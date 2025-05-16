@@ -29,8 +29,6 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
             <Logo size="md" />
-            {/* Use conditional text color for better visibility in light mode */}
-            <span className={`text-xl font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Neura</span>
           </Link>
 
           {/* Desktop navigation */}
@@ -61,27 +59,21 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         {children}
       </main>
 
-      {/* Footer (hidden in mobile chat view) */}
-      {showFooter && (
-        <footer className="py-6 px-4 border-t mt-auto">
-          <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Logo size="sm" />
-                {/* Only show text on md+ screens */}
-                <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  &copy; {new Date().getFullYear()} Neura AI
-                </span>
-              </div>
-              
-              <div className="flex gap-6 text-sm justify-center">
-                <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
-                <Link to="/terms" className="hover:underline">Terms of Service</Link>
-              </div>
+      {/* Footer */}
+      <footer className="py-6 px-4 border-t mt-auto">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Logo size="sm" />
+            </div>
+            
+            <div className="flex gap-6 text-sm justify-center">
+              <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+              <Link to="/terms" className="hover:underline">Terms of Service</Link>
             </div>
           </div>
-        </footer>
-      )}
+        </div>
+      </footer>
 
       {/* Mobile Navigation Bar at bottom */}
       {isMobile && (

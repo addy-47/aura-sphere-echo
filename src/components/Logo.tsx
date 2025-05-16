@@ -48,7 +48,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', withText = true, monochrome = 
       </div>
       
       {withText && (
-        <span className={`font-light ${textSizes[size]} tracking-widest ${textSizes[size]} text-current uppercase`}>
+        <span className={`font-light ${textSizes[size]} tracking-widest ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
           Neura
         </span>
       )}

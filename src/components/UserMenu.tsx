@@ -90,7 +90,7 @@ const UserMenu = () => {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/" className="flex items-center cursor-pointer w-full">
+          <Link to="/dashboard" className="flex items-center cursor-pointer w-full">
             <Settings className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>

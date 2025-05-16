@@ -20,7 +20,7 @@ const CustomizePage = () => {
   ]);
   const [newMacro, setNewMacro] = useState({ name: '', command: '', response: '' });
   const { moodColor } = useMood();
-
+  
   const handleSavePersonalization = () => {
     toast.success('Personalization settings saved!');
   };
@@ -43,8 +43,8 @@ const CustomizePage = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Customize Your AI</h1>
+      <div className="max-w-4xl mx-auto px-4 pb-24 md:pb-12"> {/* Added padding at bottom for mobile nav */}
+        <h1 className="text-3xl font-bold mb-8 pt-4">Customize Your AI</h1>
         
         <Tabs defaultValue="personalization">
           <TabsList className="grid w-full grid-cols-3 mb-8">

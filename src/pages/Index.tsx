@@ -40,7 +40,7 @@ const Index = () => {
           </p>
           
           {/* Enhanced 3D Sphere representation with improved shadow */}
-          <div className="my-8">
+          <div className="my-12">
             <div 
               className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-2 md:mb-4 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105"
               style={{ 
@@ -68,7 +68,7 @@ const Index = () => {
           {/* Get Started Button with hover animation */}
           <Link 
             to="/signin" 
-            className="mt-8 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-medium
+            className="mt-12 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-medium
               transition-all duration-300 hover:scale-105 bg-black/80 backdrop-blur-md border border-white/20 
               shadow-lg hover:shadow-xl hover:border-white/30 w-full sm:w-auto"
             style={{
