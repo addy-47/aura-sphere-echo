@@ -1,9 +1,9 @@
+
 import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useMood } from '../contexts/MoodContext';
-import { moodColors } from '../contexts/MoodContext';
 import Layout from '../components/Layout';
 import { Send, ChevronUp, ChevronDown } from 'lucide-react';
 import * as THREE from 'three';
@@ -16,11 +16,11 @@ if (typeof window !== 'undefined' && !window.THREE) {
   console.log("THREE initialized in ChatPage:", THREE.REVISION);
 }
 
-// Import Sphere3D with React.lazy for code splitting
-const Sphere3D = lazy(() => {
-  console.log("Lazy loading Sphere3D component");
-  return import('../components/Sphere3D').catch(error => {
-    console.error("Failed to load Sphere3D:", error);
+// Import AdvancedSphere with React.lazy for code splitting
+const AdvancedSphere = lazy(() => {
+  console.log("Lazy loading AdvancedSphere component");
+  return import('../components/AdvancedSphere').catch(error => {
+    console.error("Failed to load AdvancedSphere:", error);
     // Return a simple fallback module
     return { 
       default: (props: any) => (
@@ -54,6 +54,7 @@ const ChatPage = () => {
   const { mood, setMood, moodColor } = useMood();
   const isMobile = useIsMobile();
   const [chatExpanded, setChatExpanded] = useState(!isMobile);
+  const [lastResponse, setLastResponse] = useState("");
 
   useEffect(() => {
     scrollToBottom();
@@ -91,6 +92,7 @@ const ChatPage = () => {
       setTimeout(() => {
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
         resolve(randomResponse);
+        setLastResponse(randomResponse);
         setIsProcessing(false);
       }, 1500);
     });
@@ -130,7 +132,7 @@ const ChatPage = () => {
     return (
       <Layout>
         <div className="flex flex-col h-[calc(100vh-8rem)] relative">
-          {/* 3D Sphere (takes full screen on mobile) */}
+          {/* Advanced Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
             <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '60vh' }}>
               <Suspense fallback={
@@ -139,7 +141,11 @@ const ChatPage = () => {
                 </div>
               }>
                 {typeof window !== 'undefined' && window.THREE ? (
-                  <Sphere3D isProcessing={isProcessing} />
+                  <AdvancedSphere 
+                    isProcessing={isProcessing} 
+                    text={lastResponse}
+                    intensity={1.2}
+                  />
                 ) : (
                   <div className="text-center p-4">Three.js not initialized</div>
                 )}
@@ -239,20 +245,24 @@ const ChatPage = () => {
     );
   }
 
-  // Desktop layout - keep unchanged
+  // Desktop layout 
   return (
     <Layout>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[70vh]">
-        {/* 3D Sphere */}
+        {/* Advanced Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>
             <Suspense fallback={
               <div className="text-center p-4 w-full h-full flex items-center justify-center">
-                <div className="animate-pulse">Loading 3D visualization...</div>
+                <div className="animate-pulse">Loading advanced visualization...</div>
               </div>
             }>
               {typeof window !== 'undefined' && window.THREE ? (
-                <Sphere3D isProcessing={isProcessing} />
+                <AdvancedSphere 
+                  isProcessing={isProcessing} 
+                  text={lastResponse}
+                  intensity={1}
+                />
               ) : (
                 <div className="text-center p-4">Three.js not initialized</div>
               )}
