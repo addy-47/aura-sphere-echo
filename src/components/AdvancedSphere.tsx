@@ -6,7 +6,8 @@ import { useMood } from '../contexts/MoodContext';
 import { OrbitControls, MeshDistortMaterial, MeshWobbleMaterial, GradientTexture, Sphere } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSpring, animated, config } from '@react-spring/three';
-import { SimplexNoise } from 'three/examples/jsm/math/SimplexNoise';
+// Replace SimplexNoise import with a custom noise implementation
+import { createNoise3D } from 'simplex-noise'; // We'll add this dependency
 
 // Character animation mappings
 type AnimationPattern = {
@@ -24,6 +25,14 @@ interface AdvancedSphereProps {
   size?: number;
   intensity?: number;
 }
+
+// Custom simplex noise implementation since the import path is different
+const createSimplexNoise = () => {
+  const noise3D = createNoise3D();
+  return {
+    noise3d: (x: number, y: number, z: number) => noise3D(x, y, z)
+  };
+};
 
 // Custom hook for character-specific animations
 const useCharacterAnimations = () => {
@@ -88,8 +97,9 @@ const useCharacterAnimations = () => {
 // The actual 3D sphere component
 const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: AdvancedSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.Material>(null);
-  const noiseRef = useRef<SimplexNoise>();
+  // Fix the material ref type to be specifically MeshPhysicalMaterial
+  const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
+  const noiseRef = useRef<ReturnType<typeof createSimplexNoise>>();
   const { theme } = useTheme();
   const { moodColor, mood } = useMood();
   const characterAnimations = useCharacterAnimations();
@@ -105,7 +115,7 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
 
   // Initialize simplex noise for organic movement
   useEffect(() => {
-    noiseRef.current = new SimplexNoise();
+    noiseRef.current = createSimplexNoise();
     
     // Character animation timing
     const interval = setInterval(() => {
@@ -176,11 +186,11 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
     ) * distortion * intensity;
 
     // Apply distortions as morphing targets
-    sphereRef.current.morphTargetInfluences = [
-      Math.sin(time * pulseSpeed) * amplitude * intensity,
-      Math.cos(time * pulseSpeed * 0.8) * amplitude * 0.8 * intensity,
-      Math.sin(time * pulseSpeed * 1.2 + phase) * amplitude * 0.6 * intensity
-    ];
+    if (sphereRef.current.morphTargetInfluences) {
+      sphereRef.current.morphTargetInfluences[0] = Math.sin(time * pulseSpeed) * amplitude * intensity;
+      sphereRef.current.morphTargetInfluences[1] = Math.cos(time * pulseSpeed * 0.8) * amplitude * 0.8 * intensity;
+      sphereRef.current.morphTargetInfluences[2] = Math.sin(time * pulseSpeed * 1.2 + phase) * amplitude * 0.6 * intensity;
+    }
     
     // Apply character-specific rotation
     sphereRef.current.rotation.x += rotation[0] * intensity;
@@ -192,10 +202,9 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
     sphereRef.current.position.y = Math.cos(time * frequency * 1.3) * amplitude * 0.1;
     
     // Update material properties for glow effect
-    if (materialRef.current && 'emissiveIntensity' in materialRef.current) {
-      const material = materialRef.current as THREE.MeshStandardMaterial;
-      material.emissiveIntensity = emissiveIntensity.get();
-      material.needsUpdate = true;
+    if (materialRef.current) {
+      materialRef.current.emissiveIntensity = emissiveIntensity.get();
+      materialRef.current.needsUpdate = true;
     }
   });
 
@@ -231,21 +240,18 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
     <animated.mesh 
       ref={sphereRef} 
       scale={scale as any}
-      morphTargetInfluences={[0, 0, 0]}
     >
       {/* Main sphere with multiple levels of animation */}
       <sphereGeometry 
         args={[1, 128, 128]} 
-        morphAttributes={true}
-        morphTargets={true}
       >
-        {/* Create morph targets for complex animations */}
+        {/* Create morph targets for complex animations - fix the morphAttributes type issue */}
         <sphereGeometry args={[1.1, 32, 32]} attach="morphAttributes-position-0" />
         <sphereGeometry args={[0.9, 32, 32]} attach="morphAttributes-position-1" />
         <sphereGeometry args={[1.05, 64, 64]} attach="morphAttributes-position-2" />
       </sphereGeometry>
       
-      {/* Advanced material with animated properties */}
+      {/* Advanced material with animated properties - fix the material ref type */}
       <animated.meshPhysicalMaterial
         ref={materialRef}
         color={sphereColors.baseColor}
