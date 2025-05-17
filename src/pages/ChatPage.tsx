@@ -130,8 +130,8 @@ const ChatPage = () => {
   // Special layout for mobile chat page
   if (isMobile) {
     return (
-      <Layout>
-        <div className="flex flex-col h-[calc(100vh-8rem)] relative">
+      <Layout hideFooter={true}>
+        <div className="flex flex-col h-[calc(100vh-4rem)] relative">
           {/* Advanced Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
             <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '60vh' }}>
@@ -155,7 +155,7 @@ const ChatPage = () => {
           
           {/* Expandable chat interface */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0`}
+            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0 pb-safe`}
             style={{
               height: chatExpanded ? '60vh' : '4rem',
               boxShadow: `0 -5px 20px ${moodColor}20`,
@@ -247,8 +247,8 @@ const ChatPage = () => {
 
   // Desktop layout 
   return (
-    <Layout>
-      <div className="flex flex-col md:flex-row gap-6 md:min-h-[70vh]">
+    <Layout hideFooter={true}>
+      <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4">
         {/* Advanced Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>

@@ -3,11 +3,11 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
-import { OrbitControls, MeshDistortMaterial, MeshWobbleMaterial, GradientTexture, Sphere } from '@react-three/drei';
+import { OrbitControls, GradientTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSpring, animated, config } from '@react-spring/three';
 // Replace SimplexNoise import with a custom noise implementation
-import { createNoise3D } from 'simplex-noise'; // We'll add this dependency
+import { createNoise3D } from 'simplex-noise';
 
 // Character animation mappings
 type AnimationPattern = {
@@ -97,8 +97,7 @@ const useCharacterAnimations = () => {
 // The actual 3D sphere component
 const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: AdvancedSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
-  // Fix the material ref type to be specifically MeshPhysicalMaterial
-  const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
+  const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const noiseRef = useRef<ReturnType<typeof createSimplexNoise>>();
   const { theme } = useTheme();
   const { moodColor, mood } = useMood();
@@ -245,14 +244,13 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
       <sphereGeometry 
         args={[1, 128, 128]} 
       >
-        {/* Create morph targets for complex animations - fix the morphAttributes type issue */}
         <sphereGeometry args={[1.1, 32, 32]} attach="morphAttributes-position-0" />
         <sphereGeometry args={[0.9, 32, 32]} attach="morphAttributes-position-1" />
         <sphereGeometry args={[1.05, 64, 64]} attach="morphAttributes-position-2" />
       </sphereGeometry>
       
-      {/* Advanced material with animated properties - fix the material ref type */}
-      <animated.meshPhysicalMaterial
+      {/* Advanced material with animated properties */}
+      <animated.meshStandardMaterial
         ref={materialRef}
         color={sphereColors.baseColor}
         emissive={moodColor}
@@ -260,7 +258,6 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
         wireframe={mood === 'sad'}
         transparent={true}
         opacity={0.9}
-        {...customShaderProps}
       >
         <GradientTexture
           stops={[0, 0.2, 0.4, 0.6, 1]}
@@ -268,7 +265,7 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
           size={256}
           attach="emissiveMap"
         />
-      </animated.meshPhysicalMaterial>
+      </animated.meshStandardMaterial>
       
       {/* Inner glow sphere for depth effect */}
       <mesh scale={[0.96, 0.96, 0.96]}>
@@ -347,22 +344,17 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
             dpr={[1, 2]} 
             gl={{ 
               antialias: true,
-              powerPreference: 'high-performance',
+              powerPreference: 'default',
               alpha: true,
-              stencil: false,
-              depth: true,
-              logarithmicDepthBuffer: true
+              depth: true
             }}
             shadows
           >
             {/* Enhanced lighting setup */}
             <ambientLight intensity={0.4} />
-            <pointLight position={[10, 10, 10]} intensity={0.6} castShadow />
+            <pointLight position={[10, 10, 10]} intensity={0.6} />
             <pointLight position={[-10, -10, -10]} intensity={0.4} />
-            <spotLight position={[5, 5, 5]} intensity={0.6} angle={0.5} penumbra={1} castShadow />
-            
-            {/* High-quality environment */}
-            <fog attach="fog" args={['#000000', 5, 15]} />
+            <spotLight position={[5, 5, 5]} intensity={0.6} angle={0.5} penumbra={1} />
             
             {/* The main animated sphere */}
             <AnimatedSphere text={text} isProcessing={isProcessing} intensity={intensity} />

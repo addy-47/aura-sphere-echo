@@ -12,9 +12,10 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 interface LayoutProps {
   children: ReactNode;
   minimal?: boolean;
+  hideFooter?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
+const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter = false }) => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isMobile = useIsMobile();
@@ -194,28 +195,30 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false }) => {
         {children}
       </main>
 
-      {/* Footer - updated layout */}
-      <footer className="py-6 px-4 border-t mt-auto">
-        <div className="container mx-auto">
-          <div className="flex flex-wrap items-center justify-between">
-            {/* Logo on the left */}
-            <div className="flex items-center mb-4 sm:mb-0">
-              <Logo size="sm" withText={true} />
-            </div>
-            
-            {/* Links centered */}
-            <div className="flex gap-6 text-sm justify-center mx-auto">
-              <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
-              <Link to="/terms" className="hover:underline">Terms of Service</Link>
-            </div>
-            
-            {/* Copyright on the right */}
-            <div className="text-sm text-muted-foreground mt-4 sm:mt-0">
-              © 2025 Neura AI. All rights reserved.
+      {/* Footer - updated layout, with option to hide */}
+      {!hideFooter && (
+        <footer className="py-6 px-4 border-t mt-auto">
+          <div className="container mx-auto">
+            <div className="flex flex-wrap items-center justify-between">
+              {/* Logo on the left */}
+              <div className="flex items-center mb-4 sm:mb-0">
+                <Logo size="sm" withText={true} />
+              </div>
+              
+              {/* Links centered */}
+              <div className="flex gap-6 text-sm justify-center mx-auto">
+                <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+                <Link to="/terms" className="hover:underline">Terms of Service</Link>
+              </div>
+              
+              {/* Copyright on the right */}
+              <div className="text-sm text-muted-foreground mt-4 sm:mt-0">
+                © 2025 Neura AI. All rights reserved.
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };
