@@ -119,24 +119,24 @@ const ChatPage = () => {
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
           {/* Simplified Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
-            <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '60vh' }}>
+            <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '50vh' }}>
               <Sphere3D isProcessing={isProcessing} />
             </div>
           </div>
           
-          {/* Expandable chat interface */}
+          {/* Expandable chat interface - Improved positioning */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0`}
+            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0 pb-safe`}
             style={{
               height: chatExpanded ? '60vh' : '4rem',
               boxShadow: `0 -5px 20px ${moodColor}20`,
               borderColor: moodColor + '30',
-              paddingBottom: 'env(safe-area-inset-bottom)' // Safe area for notched phones
+              paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' // Safe area for notched phones with minimum padding
             }}
           >
-            {/* Chat toggle button */}
+            {/* Chat toggle button - Moved above the text */}
             <button 
-              className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-background rounded-t-xl border flex items-center justify-center shadow-md"
+              className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-background rounded-t-xl border flex items-center justify-center shadow-md z-10"
               onClick={() => setChatExpanded(!chatExpanded)}
               style={{ borderColor: moodColor + '30' }}
             >
@@ -184,8 +184,8 @@ const ChatPage = () => {
                 </ScrollArea>
               )}
               
-              {/* Always visible input area */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
+              {/* Always visible input area - Improved positioning */}
+              <form onSubmit={handleSendMessage} className="p-4 pb-safe border-t border-opacity-20" style={{ borderColor: moodColor + '30' }}>
                 <div className="flex space-x-2">
                   <Input
                     value={input}

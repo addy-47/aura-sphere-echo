@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +18,14 @@ import {
   ArrowUp,
   ArrowDown,
   Layers,
+  Bell,
+  Check,
+  X
 } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import SpotifyIcon from '../components/icons/SpotifyIcon';
+import { Switch } from '@/components/ui/switch';
+import { Toggle } from '@/components/ui/toggle';
 
 const data = [
   { name: 'Jan', value: 40 },
@@ -34,6 +40,54 @@ const data = [
   { name: 'Oct', value: 110 },
   { name: 'Nov', value: 120 },
   { name: 'Dec', value: 130 },
+];
+
+const activityData = [
+  { 
+    id: 1,
+    type: 'chat',
+    title: 'AI Chat Session',
+    description: 'Discussed project requirements',
+    timestamp: '2 hours ago',
+    duration: '15 min',
+    completed: true
+  },
+  { 
+    id: 2,
+    type: 'analysis',
+    title: 'Data Analysis',
+    description: 'Analyzed Q2 marketing performance',
+    timestamp: '5 hours ago',
+    duration: '42 min',
+    completed: true
+  },
+  { 
+    id: 3,
+    type: 'settings',
+    title: 'Settings Updated',
+    description: 'Changed notification preferences',
+    timestamp: '1 day ago',
+    duration: '3 min',
+    completed: true
+  },
+  { 
+    id: 4,
+    type: 'customize',
+    title: 'AI Customization',
+    description: 'Adjusted personality parameters',
+    timestamp: '3 days ago',
+    duration: '12 min',
+    completed: true
+  },
+  { 
+    id: 5,
+    type: 'system',
+    title: 'System Maintenance',
+    description: 'Scheduled maintenance backup',
+    timestamp: '5 days ago',
+    duration: '25 min',
+    completed: true
+  }
 ];
 
 const DashboardPage = () => {
@@ -264,28 +318,230 @@ const DashboardPage = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="activity">
-            {/* Activity content */}
-            <Card className="border-none shadow-none">
+          <TabsContent value="activity" className="mt-6">
+            {/* Activity content - improved and filled in */}
+            <Card>
               <CardHeader>
                 <CardTitle>Activity Feed</CardTitle>
                 <CardDescription>Your recent activity across the platform</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Activity tab content would go here...</p>
+                <div className="space-y-6">
+                  {activityData.map((activity) => (
+                    <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-lg border bg-card">
+                      <div className={`p-2 rounded-full ${
+                        activity.type === 'chat' ? 'bg-blue-100 text-blue-600' :
+                        activity.type === 'analysis' ? 'bg-purple-100 text-purple-600' :
+                        activity.type === 'settings' ? 'bg-amber-100 text-amber-600' :
+                        activity.type === 'customize' ? 'bg-green-100 text-green-600' :
+                        'bg-gray-100 text-gray-600'
+                      } dark:bg-opacity-20`}>
+                        {activity.type === 'chat' && <MessageSquare className="h-5 w-5" />}
+                        {activity.type === 'analysis' && <LineChart className="h-5 w-5" />}
+                        {activity.type === 'settings' && <Settings className="h-5 w-5" />}
+                        {activity.type === 'customize' && <Users className="h-5 w-5" />}
+                        {activity.type === 'system' && <Bell className="h-5 w-5" />}
+                      </div>
+                      
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">{activity.title}</p>
+                          <span className="text-xs text-muted-foreground">{activity.timestamp}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{activity.description}</p>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>{activity.duration}</span>
+                          {activity.completed && (
+                            <span className="inline-flex items-center ml-2 text-green-600 dark:text-green-400">
+                              <Check className="h-3 w-3 mr-1" />
+                              Completed
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Session Timeline */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Recent Sessions</CardTitle>
+                <CardDescription>Timeline of your AI interaction sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
+                  
+                  <div className="space-y-8 relative pl-10">
+                    <div className="relative">
+                      <div className="absolute -left-6 h-4 w-4 rounded-full bg-primary border-4 border-background" />
+                      <div>
+                        <h4 className="text-sm font-medium">Advanced AI Brainstorming</h4>
+                        <p className="text-xs text-muted-foreground">Today at 10:30 AM</p>
+                        <p className="mt-2 text-sm">Generated 5 project ideas with detailed analysis</p>
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="absolute -left-6 h-4 w-4 rounded-full bg-muted border-4 border-background" />
+                      <div>
+                        <h4 className="text-sm font-medium">Document Analysis</h4>
+                        <p className="text-xs text-muted-foreground">Yesterday at 3:15 PM</p>
+                        <p className="mt-2 text-sm">Processed 3 legal documents with 98% accuracy</p>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute -left-6 h-4 w-4 rounded-full bg-muted border-4 border-background" />
+                      <div>
+                        <h4 className="text-sm font-medium">Weekly Status Report</h4>
+                        <p className="text-xs text-muted-foreground">June 15, 2025</p>
+                        <p className="mt-2 text-sm">Generated weekly summary and analytics report</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="settings">
-            {/* Settings content */}
-            <Card className="border-none shadow-none">
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            {/* Settings content - improved and filled in */}
+            <Card>
               <CardHeader>
                 <CardTitle>Dashboard Settings</CardTitle>
                 <CardDescription>Configure your dashboard preferences</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p>Settings tab content would go here...</p>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Privacy & Data</h3>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Share Analytics</p>
+                      <p className="text-sm text-muted-foreground">Allow anonymous usage data sharing to improve AI</p>
+                    </div>
+                    <Switch id="share-analytics" defaultChecked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Cloud Storage</p>
+                      <p className="text-sm text-muted-foreground">Store your interactions in the cloud</p>
+                    </div>
+                    <Switch id="cloud-storage" defaultChecked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Personalization</p>
+                      <p className="text-sm text-muted-foreground">Allow AI to adapt to your preferences</p>
+                    </div>
+                    <Switch id="personalization" defaultChecked />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium">Notifications</h3>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Email Updates</p>
+                      <p className="text-sm text-muted-foreground">Receive weekly summaries and updates</p>
+                    </div>
+                    <Switch id="email-updates" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">System Alerts</p>
+                      <p className="text-sm text-muted-foreground">Get notified about important system changes</p>
+                    </div>
+                    <Switch id="system-alerts" defaultChecked />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium">Display Settings</h3>
+                  
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-medium">Dashboard Layout</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Toggle variant="outline" aria-label="Toggle compact" defaultPressed>
+                        <p className="text-xs">Standard</p>
+                      </Toggle>
+                      <Toggle variant="outline" aria-label="Toggle compact">
+                        <p className="text-xs">Compact</p>
+                      </Toggle>
+                      <Toggle variant="outline" aria-label="Toggle compact">
+                        <p className="text-xs">Expanded</p>
+                      </Toggle>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-medium">Graph Style</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Toggle variant="outline" aria-label="Toggle compact" defaultPressed>
+                        <p className="text-xs">Area</p>
+                      </Toggle>
+                      <Toggle variant="outline" aria-label="Toggle compact">
+                        <p className="text-xs">Line</p>
+                      </Toggle>
+                      <Toggle variant="outline" aria-label="Toggle compact">
+                        <p className="text-xs">Bar</p>
+                      </Toggle>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t p-6">
+                <Button variant="outline">Cancel</Button>
+                <Button>Save Changes</Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Account & Data</CardTitle>
+                <CardDescription>Manage your account settings and data</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Data Management</h3>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Export All Data</p>
+                      <p className="text-sm text-muted-foreground">Download all your data in JSON format</p>
+                    </div>
+                    <Button variant="outline" size="sm">Export</Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Clear History</p>
+                      <p className="text-sm text-muted-foreground">Delete all your recent activity</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600">Clear</Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="font-medium text-red-500">Danger Zone</h3>
+                  
+                  <div className="flex items-center justify-between p-4 border border-red-200 rounded-md bg-red-50 dark:border-red-900 dark:bg-red-950/30">
+                    <div>
+                      <p className="font-medium">Delete Account</p>
+                      <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
+                    </div>
+                    <Button variant="destructive" size="sm">Delete Account</Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

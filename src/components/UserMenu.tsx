@@ -19,7 +19,11 @@ interface UserInfo {
   isAuthenticated: boolean;
 }
 
-const UserMenu = () => {
+interface UserMenuProps {
+  showInMobileMenu?: boolean;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ showInMobileMenu = false }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const navigate = useNavigate();
 
@@ -67,6 +71,49 @@ const UserMenu = () => {
     navigate('/dashboard');
   };
 
+  // If showing in mobile menu, render direct links
+  if (showInMobileMenu) {
+    if (!user) {
+      return (
+        <div className="flex flex-col gap-2">
+          <Button variant="default" asChild className="w-full">
+            <Link to="/signin">Sign In</Link>
+          </Button>
+          <Button variant="outline" asChild className="w-full">
+            <Link to="/signup">Sign Up</Link>
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="px-4 py-2 text-sm font-medium">
+          Signed in as: <span className="font-bold">{user.name}</span>
+        </div>
+        <Link to="/" className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent/50 rounded-md">
+          <Home className="h-4 w-4" />
+          <span>Home</span>
+        </Link>
+        <button 
+          onClick={handleDashboardClick}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-accent/50 rounded-md w-full"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Dashboard</span>
+        </button>
+        <button 
+          onClick={handleSignOut}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-left text-red-500 hover:bg-red-500/10 rounded-md w-full mt-2"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sign out</span>
+        </button>
+      </div>
+    );
+  }
+
+  // Regular dropdown for desktop
   if (!user) {
     return (
       <div className="flex items-center gap-2">

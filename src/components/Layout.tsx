@@ -1,7 +1,7 @@
 
 import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Moon, Sun, Menu, X } from 'lucide-react';
+import { Moon, Sun, Menu } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from './Logo';
 import { Button } from './ui/button';
@@ -115,11 +115,11 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center">
-              <Logo size={isMobile ? "sm" : "md"} withText={!isMobile} />
+              <Logo size={isMobile ? "sm" : "md"} withText={true} />
             </Link>
           </div>
 
-          {/* Desktop navigation - using NavigationMenu */}
+          {/* Desktop navigation - simplified with just direct links */}
           {!isMobile && (
             <NavigationMenu className="hidden md:flex mx-auto">
               <NavigationMenuList>
@@ -139,58 +139,48 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      location.pathname === "/chat" 
-                        ? "bg-accent text-accent-foreground" 
-                        : "text-foreground/60"
-                    )}
-                  >
-                    Features
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      <li className="row-span-3">
-                        <Link to="/chat">
-                          <NavigationMenuLink asChild>
-                            <NavLink
-                              title="AI Chat"
-                              className={cn(
-                                "flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md",
-                                location.pathname === "/chat" && "from-accent/50 to-accent/80"
-                              )}
-                            >
-                              Experience our state-of-the-art AI assistant with advanced visualization
-                            </NavLink>
-                          </NavigationMenuLink>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/customize">
-                          <NavigationMenuLink asChild>
-                            <NavLink
-                              title="Customize"
-                              className={location.pathname === "/customize" ? "bg-accent/50" : ""}
-                            >
-                              Personalize your AI experience
-                            </NavLink>
-                          </NavigationMenuLink>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/dashboard">
-                          <NavigationMenuLink asChild>
-                            <NavLink
-                              title="Dashboard" 
-                              className={location.pathname === "/dashboard" ? "bg-accent/50" : ""}
-                            >
-                              View your analytics and activity
-                            </NavLink>
-                          </NavigationMenuLink>
-                        </Link>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
+                  <Link to="/chat">
+                    <NavigationMenuLink
+                      className={cn(
+                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                        location.pathname === "/chat" 
+                          ? "bg-accent text-accent-foreground" 
+                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                      )}
+                    >
+                      Chat
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/customize">
+                    <NavigationMenuLink
+                      className={cn(
+                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                        location.pathname === "/customize" 
+                          ? "bg-accent text-accent-foreground" 
+                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                      )}
+                    >
+                      Customize
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link to="/dashboard">
+                    <NavigationMenuLink
+                      className={cn(
+                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                        location.pathname === "/dashboard" 
+                          ? "bg-accent text-accent-foreground" 
+                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                      )}
+                    >
+                      Dashboard
+                    </NavigationMenuLink>
+                  </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -198,7 +188,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
 
           <div className="flex items-center gap-2">
             {/* Mobile menu - enhanced with improved UI */}
-            {isMobile && (
+            {isMobile ? (
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
                   <Button 
@@ -210,11 +200,8 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[280px] pt-10">
+                <SheetContent side="right" className="w-[280px] pt-10">
                   <div className="flex flex-col gap-6 mt-6">
-                    <div className="flex items-center justify-center mb-8">
-                      <Logo size="md" withText={true} />
-                    </div>
                     <div className="space-y-1">
                       <Link 
                         to="/" 
@@ -254,7 +241,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                       </Link>
                     </div>
                     
-                    <div className="mt-auto pt-6 border-t border-border">
+                    <div className="mt-4 pt-4 border-t border-border">
                       <Button 
                         variant="ghost" 
                         size="sm"
@@ -264,23 +251,29 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                         {theme === 'dark' ? <Sun className="h-5 w-5 mr-2" /> : <Moon className="h-5 w-5 mr-2" />}
                         {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                       </Button>
+                      
+                      <div className="mt-4">
+                        <UserMenu showInMobileMenu={true} />
+                      </div>
                     </div>
                   </div>
                 </SheetContent>
               </Sheet>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleTheme} 
+                  title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  className="rounded-full"
+                >
+                  {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </Button>
+                
+                <UserMenu />
+              </>
             )}
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleTheme} 
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="rounded-full"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            
-            <UserMenu />
           </div>
         </div>
       </header>
