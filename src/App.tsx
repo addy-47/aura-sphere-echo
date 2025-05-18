@@ -24,10 +24,21 @@ const queryClient = new QueryClient();
 // PageTransitionWrapper for handling transitions between pages
 const PageTransitionWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [prevPath, setPrevPath] = React.useState("");
 
   React.useEffect(() => {
+    // Initial load handler
+    if (prevPath === "") {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1200);
+      
+      setPrevPath(location.pathname);
+      return () => clearTimeout(timer);
+    }
+    
+    // Handle subsequent navigation
     if (prevPath !== location.pathname) {
       setIsLoading(true);
       setPrevPath(location.pathname);

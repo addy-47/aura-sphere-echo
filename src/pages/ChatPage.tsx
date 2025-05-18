@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,28 +9,13 @@ import { Send, ChevronUp, ChevronDown } from 'lucide-react';
 import * as THREE from 'three';
 import { useIsMobile } from '../hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import Sphere3D from '../components/Sphere3D';
 
 // Ensure THREE is available globally
 if (typeof window !== 'undefined' && !window.THREE) {
   window.THREE = THREE;
   console.log("THREE initialized in ChatPage:", THREE.REVISION);
 }
-
-// Import AdvancedSphere with React.lazy for code splitting
-const AdvancedSphere = lazy(() => {
-  console.log("Lazy loading AdvancedSphere component");
-  return import('../components/AdvancedSphere').catch(error => {
-    console.error("Failed to load AdvancedSphere:", error);
-    // Return a simple fallback module
-    return { 
-      default: (props: any) => (
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="text-center p-4">Error loading 3D visualization</div>
-        </div>
-      )
-    };
-  });
-});
 
 interface Message {
   id: string;
@@ -132,24 +117,10 @@ const ChatPage = () => {
     return (
       <Layout hideFooter={true}>
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
-          {/* Advanced Sphere (takes full screen on mobile) */}
+          {/* Simplified Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
             <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '60vh' }}>
-              <Suspense fallback={
-                <div className="text-center p-4 w-full h-full flex items-center justify-center min-h-[60vh]">
-                  <div className="animate-pulse">Loading 3D visualization...</div>
-                </div>
-              }>
-                {typeof window !== 'undefined' && window.THREE ? (
-                  <AdvancedSphere 
-                    isProcessing={isProcessing} 
-                    text={lastResponse}
-                    intensity={1.2}
-                  />
-                ) : (
-                  <div className="text-center p-4">Three.js not initialized</div>
-                )}
-              </Suspense>
+              <Sphere3D isProcessing={isProcessing} />
             </div>
           </div>
           
@@ -250,24 +221,10 @@ const ChatPage = () => {
   return (
     <Layout hideFooter={true}>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
-        {/* Advanced Sphere */}
+        {/* Simple Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>
-            <Suspense fallback={
-              <div className="text-center p-4 w-full h-full flex items-center justify-center">
-                <div className="animate-pulse">Loading advanced visualization...</div>
-              </div>
-            }>
-              {typeof window !== 'undefined' && window.THREE ? (
-                <AdvancedSphere 
-                  isProcessing={isProcessing} 
-                  text={lastResponse}
-                  intensity={1}
-                />
-              ) : (
-                <div className="text-center p-4">Three.js not initialized</div>
-              )}
-            </Suspense>
+            <Sphere3D isProcessing={isProcessing} />
           </Card>
         </div>
         
