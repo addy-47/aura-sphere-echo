@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,9 +17,9 @@ import {
   ArrowUp,
   ArrowDown,
   Layers,
-  Spotify,
 } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import SpotifyIcon from '../components/icons/SpotifyIcon';
 
 const data = [
   { name: 'Jan', value: 40 },
@@ -250,8 +249,7 @@ const DashboardPage = () => {
                   <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
                     <CardHeader className="p-4">
                       <CardTitle className="text-sm flex items-center gap-2">
-                        {/* Fixed Spotify icon */}
-                        <Spotify className="h-5 w-5 text-green-500" />
+                        <SpotifyIcon className="h-5 w-5 text-green-500" />
                         <span>Spotify</span>
                       </CardTitle>
                     </CardHeader>
