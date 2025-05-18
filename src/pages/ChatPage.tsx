@@ -155,11 +155,12 @@ const ChatPage = () => {
           
           {/* Expandable chat interface */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0 pb-safe`}
+            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0`}
             style={{
               height: chatExpanded ? '60vh' : '4rem',
               boxShadow: `0 -5px 20px ${moodColor}20`,
-              borderColor: moodColor + '30'
+              borderColor: moodColor + '30',
+              paddingBottom: 'env(safe-area-inset-bottom)' // Safe area for notched phones
             }}
           >
             {/* Chat toggle button */}
@@ -248,7 +249,7 @@ const ChatPage = () => {
   // Desktop layout 
   return (
     <Layout hideFooter={true}>
-      <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4">
+      <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
         {/* Advanced Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>

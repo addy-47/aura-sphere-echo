@@ -6,7 +6,7 @@ import { useMood } from '../contexts/MoodContext';
 import { OrbitControls, GradientTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSpring, animated, config } from '@react-spring/three';
-// Replace SimplexNoise import with a custom noise implementation
+// Using simplex-noise package
 import { createNoise3D } from 'simplex-noise';
 
 // Character animation mappings
@@ -25,14 +25,6 @@ interface AdvancedSphereProps {
   size?: number;
   intensity?: number;
 }
-
-// Custom simplex noise implementation since the import path is different
-const createSimplexNoise = () => {
-  const noise3D = createNoise3D();
-  return {
-    noise3d: (x: number, y: number, z: number) => noise3D(x, y, z)
-  };
-};
 
 // Custom hook for character-specific animations
 const useCharacterAnimations = () => {
@@ -98,7 +90,7 @@ const useCharacterAnimations = () => {
 const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: AdvancedSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
-  const noiseRef = useRef<ReturnType<typeof createSimplexNoise>>();
+  const noiseRef = useRef<{ noise3d: (x: number, y: number, z: number) => number }>();
   const { theme } = useTheme();
   const { moodColor, mood } = useMood();
   const characterAnimations = useCharacterAnimations();
@@ -114,7 +106,10 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
 
   // Initialize simplex noise for organic movement
   useEffect(() => {
-    noiseRef.current = createSimplexNoise();
+    const noise3D = createNoise3D();
+    noiseRef.current = {
+      noise3d: (x: number, y: number, z: number) => noise3D(x, y, z)
+    };
     
     // Character animation timing
     const interval = setInterval(() => {
@@ -150,10 +145,9 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
   };
 
   // Spring animation for smooth transitions between states
-  const { scale, emissiveIntensity, wobbleSpeed } = useSpring({
+  const { scale, emissiveIntensity } = useSpring({
     scale: isProcessing ? [1.05, 1.05, 1.05] : [1, 1, 1],
     emissiveIntensity: getEmissiveIntensity(),
-    wobbleSpeed: isProcessing ? 2 : 1,
     config: config.gentle
   });
 
@@ -163,33 +157,6 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
     
     const time = clock.getElapsedTime();
     const { frequency, amplitude, phase, distortion, rotation, pulseSpeed } = animationParams;
-    
-    // Complex distortion animation based on character properties
-    const noiseTime = time * frequency;
-    const xDistortion = noiseRef.current.noise3d(
-      noiseTime * 0.5, 
-      0, 
-      0
-    ) * distortion * intensity;
-    
-    const yDistortion = noiseRef.current.noise3d(
-      0, 
-      noiseTime * 0.5 + phase, 
-      0
-    ) * distortion * intensity;
-    
-    const zDistortion = noiseRef.current.noise3d(
-      0, 
-      0, 
-      noiseTime * 0.5 + phase * 2
-    ) * distortion * intensity;
-
-    // Apply distortions as morphing targets
-    if (sphereRef.current.morphTargetInfluences) {
-      sphereRef.current.morphTargetInfluences[0] = Math.sin(time * pulseSpeed) * amplitude * intensity;
-      sphereRef.current.morphTargetInfluences[1] = Math.cos(time * pulseSpeed * 0.8) * amplitude * 0.8 * intensity;
-      sphereRef.current.morphTargetInfluences[2] = Math.sin(time * pulseSpeed * 1.2 + phase) * amplitude * 0.6 * intensity;
-    }
     
     // Apply character-specific rotation
     sphereRef.current.rotation.x += rotation[0] * intensity;
@@ -224,30 +191,13 @@ const AnimatedSphere = ({ text = '', isProcessing = false, intensity = 1 }: Adva
     };
   }, [moodColor, theme]);
 
-  // Custom shader material for advanced effects
-  const customShaderProps = useMemo(() => {
-    return {
-      'roughness': 0.2,
-      'metalness': 0.8,
-      'clearcoat': 0.5,
-      'clearcoatRoughness': 0.2,
-      'envMapIntensity': 1.0
-    };
-  }, []);
-
   return (
     <animated.mesh 
       ref={sphereRef} 
       scale={scale as any}
     >
-      {/* Main sphere with multiple levels of animation */}
-      <sphereGeometry 
-        args={[1, 128, 128]} 
-      >
-        <sphereGeometry args={[1.1, 32, 32]} attach="morphAttributes-position-0" />
-        <sphereGeometry args={[0.9, 32, 32]} attach="morphAttributes-position-1" />
-        <sphereGeometry args={[1.05, 64, 64]} attach="morphAttributes-position-2" />
-      </sphereGeometry>
+      {/* Main sphere */}
+      <sphereGeometry args={[1, 64, 64]} />
       
       {/* Advanced material with animated properties */}
       <animated.meshStandardMaterial
@@ -300,7 +250,7 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
 
   useEffect(() => {
     // Ensure THREE is accessible globally
-    if (!window.THREE) {
+    if (typeof window !== 'undefined' && !window.THREE) {
       window.THREE = THREE;
       console.log("THREE initialized in AdvancedSphere component:", THREE.REVISION);
     }
@@ -308,13 +258,6 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
     // Mark the component as having rendered once
     setHasRenderedOnce(true);
   }, []);
-
-  // Fallback component for loading state
-  const Fallback = () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="text-center p-4">Loading advanced visualization...</div>
-    </div>
-  );
 
   // Error boundary for Three.js rendering issues
   class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
@@ -325,6 +268,10 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
 
     static getDerivedStateFromError() {
       return { hasError: true };
+    }
+
+    componentDidCatch(error: any, errorInfo: any) {
+      console.error("Three.js Error:", error, errorInfo);
     }
 
     render() {
@@ -348,7 +295,6 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
               alpha: true,
               depth: true
             }}
-            shadows
           >
             {/* Enhanced lighting setup */}
             <ambientLight intensity={0.4} />
@@ -371,7 +317,11 @@ const AdvancedSphere: React.FC<AdvancedSphereProps> = ({ text = '', isProcessing
             />
           </Canvas>
         )}
-        {!hasRenderedOnce && <Fallback />}
+        {!hasRenderedOnce && (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-center p-4">Loading advanced visualization...</div>
+          </div>
+        )}
       </ThreeErrorBoundary>
     </div>
   );
