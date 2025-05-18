@@ -32,7 +32,7 @@ const PageTransitionWrapper = ({ children }: { children: React.ReactNode }) => {
     if (prevPath === "") {
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 1200);
+      }, 1000); // Reduce initial loading time a bit
       
       setPrevPath(location.pathname);
       return () => clearTimeout(timer);
@@ -43,10 +43,10 @@ const PageTransitionWrapper = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(true);
       setPrevPath(location.pathname);
       
-      // Simulate page loading time - adjust duration as needed
+      // Simulate page loading time - reduced for better UX
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 800);
+      }, 600);
       
       return () => clearTimeout(timer);
     }
@@ -55,7 +55,9 @@ const PageTransitionWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <LoaderPage isLoading={isLoading} />
-      {children}
+      <div className={isLoading ? 'opacity-0' : 'opacity-100 transition-opacity duration-300'}>
+        {children}
+      </div>
     </>
   );
 };

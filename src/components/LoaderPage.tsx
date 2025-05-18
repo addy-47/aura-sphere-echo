@@ -42,7 +42,7 @@ const LoaderPage: React.FC<LoaderPageProps> = ({ isLoading }) => {
 
   return (
     <>
-      {/* Add keyframes for shimmer animation in a style element without jsx/global props */}
+      {/* Add keyframes for shimmer animation in a style element */}
       <style dangerouslySetInnerHTML={{ 
         __html: `
           @keyframes shimmer {

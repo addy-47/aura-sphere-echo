@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, Suspense } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useMood } from '../contexts/MoodContext';
@@ -17,13 +17,81 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const { moodColor, mood } = useMood();
   
-  // Animation logic for the sphere
+  // Create animated gradients using shader materials
+  const uniforms = useMemo(() => ({
+    time: { value: 0 },
+    resolution: { value: new THREE.Vector2(1, 1) },
+    baseColor: { value: new THREE.Color(moodColor) },
+    pulseIntensity: { value: isProcessing ? 1.0 : 0.5 }
+  }), [moodColor, isProcessing]);
+  
+  // Custom vertex and fragment shaders for gradient effects
+  const vertexShader = `
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    void main() {
+      vUv = uv;
+      vNormal = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+
+  const fragmentShader = `
+    uniform float time;
+    uniform vec2 resolution;
+    uniform vec3 baseColor;
+    uniform float pulseIntensity;
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    
+    // Simple perlin-like noise function
+    float noise(vec3 p) {
+      return fract(sin(dot(p, vec3(12.9898, 78.233, 45.5432))) * 43758.5453);
+    }
+    
+    void main() {
+      // Create animated gradient based on normal, time, and mood color
+      vec3 color1 = baseColor;
+      vec3 color2 = baseColor * 1.5; // Brighter version of base color
+      vec3 color3 = vec3(1.0, 1.0, 1.0) * 0.8; // Near white
+      
+      // Animate colors
+      float noise1 = noise(vNormal * 5.0 + time * 0.2);
+      float noise2 = noise(vNormal * 10.0 - time * 0.1);
+      
+      // Create ripple effect
+      float ripple = sin(length(vNormal) * 20.0 + time) * 0.5 + 0.5;
+      ripple *= pulseIntensity;
+      
+      // Mix all elements for final color
+      vec3 finalColor = mix(
+        mix(color1, color2, noise1), 
+        color3, 
+        noise2 * ripple * 0.5
+      );
+      
+      // Add rim lighting effect
+      float rim = 1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
+      rim = pow(rim, 3.0) * 0.5 * pulseIntensity;
+      finalColor += vec3(1.0) * rim;
+      
+      gl_FragColor = vec4(finalColor, 1.0);
+    }
+  `;
+
+  // Update the time uniform on each frame
   useFrame(({ clock }) => {
     if (!sphereRef.current) return;
     
     // Base subtle rotation
     sphereRef.current.rotation.x = clock.getElapsedTime() * 0.1;
     sphereRef.current.rotation.y = clock.getElapsedTime() * 0.15;
+    
+    // Update shader uniforms
+    uniforms.time.value = clock.getElapsedTime();
+    uniforms.pulseIntensity.value = isProcessing 
+      ? 0.8 + Math.sin(clock.getElapsedTime() * 5) * 0.2 
+      : 0.5 + Math.sin(clock.getElapsedTime() * 0.5) * 0.1;
     
     // If processing, add pulsing effect
     if (isProcessing) {
@@ -36,32 +104,13 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
     }
   });
 
-  // Determine emission intensity based on mood
-  const getEmissiveIntensity = () => {
-    if (isProcessing) return 1.5;
-    
-    switch(mood) {
-      case 'excited': return 1.2;
-      case 'happy': return 0.8;
-      case 'angry': return 1.0;
-      case 'sad': return 0.4;
-      default: return 0.6;
-    }
-  };
-
-  // Use a consistent dark color regardless of theme
-  const sphereBaseColor = '#1a1a1a';
-
   return (
     <mesh ref={sphereRef}>
       <sphereGeometry args={[1, 64, 64]} />
-      <meshStandardMaterial 
-        color={sphereBaseColor}
-        emissive={moodColor}
-        emissiveIntensity={getEmissiveIntensity()}
-        roughness={0.2}
-        metalness={0.8}
-        wireframe={mood === 'sad' || mood === 'neutral'}
+      <shaderMaterial 
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        uniforms={uniforms}
       />
     </mesh>
   );
@@ -106,31 +155,29 @@ const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
   return (
     <div className="w-full h-full min-h-[300px]">
       <ThreeErrorBoundary>
-        <Suspense fallback={<Fallback />}>
-          <Canvas 
-            camera={{ position: [0, 0, 3.5], fov: 50 }}
-            dpr={[1, 2]} 
-            gl={{ 
-              antialias: true,
-              powerPreference: 'default',
-              failIfMajorPerformanceCaveat: false
-            }}
-          >
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            <pointLight position={[-10, -10, -5]} intensity={0.5} />
-            
-            <AnimatedSphere isProcessing={isProcessing} />
-            
-            <OrbitControls 
-              enableZoom={false}
-              enablePan={false}
-              rotateSpeed={0.5}
-              autoRotate
-              autoRotateSpeed={0.5}
-            />
-          </Canvas>
-        </Suspense>
+        <Canvas 
+          camera={{ position: [0, 0, 3.5], fov: 50 }}
+          dpr={[1, 2]} 
+          gl={{ 
+            antialias: true,
+            powerPreference: 'default',
+            failIfMajorPerformanceCaveat: false
+          }}
+        >
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
+          <pointLight position={[-10, -10, -5]} intensity={0.5} />
+          
+          <AnimatedSphere isProcessing={isProcessing} />
+          
+          <OrbitControls 
+            enableZoom={false}
+            enablePan={false}
+            rotateSpeed={0.5}
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
+        </Canvas>
       </ThreeErrorBoundary>
     </div>
   );
