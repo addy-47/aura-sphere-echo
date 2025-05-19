@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { 
@@ -9,8 +10,8 @@ import {
 } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent } from '../components/ui/tabs';
-import { PersonalityTree } from '../components/PersonalityTree';
-import { AdvancedSphere } from '../components/AdvancedSphere';
+import PersonalityTree from '../components/PersonalityTree';
+import AdvancedSphere from '../components/AdvancedSphere';
 import { useIsMobile } from '../hooks/use-mobile';
 import DashboardTabs from '../components/DashboardTabs';
 
