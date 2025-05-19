@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ChatPage from "./pages/ChatPage";
-import CustomizePage from "./pages/CustomizePage";
 import DashboardPage from "./pages/DashboardPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -32,7 +31,6 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/chat" element={<ChatPage />} />
-                <Route path="/customize" element={<CustomizePage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />

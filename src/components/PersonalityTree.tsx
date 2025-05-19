@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Check, Plus, X } from 'lucide-react';
 
-// Animation for particles going into sphere
-const AnimatedParticle = ({ position, targetPosition, onComplete }) => {
+// Animation for particles going into or out of sphere
+const AnimatedParticle = ({ position, targetPosition, onComplete, isRemoval = false }) => {
   const meshRef = useRef<THREE.Mesh>();
   const startTime = useRef(Date.now());
   const duration = 1000; // Animation duration in ms
@@ -24,14 +24,25 @@ const AnimatedParticle = ({ position, targetPosition, onComplete }) => {
     // Simple easing function
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     
-    // Lerp position
-    meshRef.current.position.x = THREE.MathUtils.lerp(position[0], targetPosition[0], easeOutQuart);
-    meshRef.current.position.y = THREE.MathUtils.lerp(position[1], targetPosition[1], easeOutQuart);
-    meshRef.current.position.z = THREE.MathUtils.lerp(position[2], targetPosition[2], easeOutQuart);
-    
-    // Scale down as it approaches center
-    const scale = THREE.MathUtils.lerp(1, 0.1, easeOutQuart);
-    meshRef.current.scale.set(scale, scale, scale);
+    if (isRemoval) {
+      // When removing, reverse the animation - start from center, go outward
+      meshRef.current.position.x = THREE.MathUtils.lerp(targetPosition[0], position[0], easeOutQuart);
+      meshRef.current.position.y = THREE.MathUtils.lerp(targetPosition[1], position[1], easeOutQuart);
+      meshRef.current.position.z = THREE.MathUtils.lerp(targetPosition[2], position[2], easeOutQuart);
+      
+      // Scale up as it moves away from center
+      const scale = THREE.MathUtils.lerp(0.1, 1, easeOutQuart);
+      meshRef.current.scale.set(scale, scale, scale);
+    } else {
+      // Adding - start from outside, move to center
+      meshRef.current.position.x = THREE.MathUtils.lerp(position[0], targetPosition[0], easeOutQuart);
+      meshRef.current.position.y = THREE.MathUtils.lerp(position[1], targetPosition[1], easeOutQuart);
+      meshRef.current.position.z = THREE.MathUtils.lerp(position[2], targetPosition[2], easeOutQuart);
+      
+      // Scale down as it approaches center
+      const scale = THREE.MathUtils.lerp(1, 0.1, easeOutQuart);
+      meshRef.current.scale.set(scale, scale, scale);
+    }
     
     // Animation complete
     if (progress === 1) {
@@ -48,26 +59,40 @@ const AnimatedParticle = ({ position, targetPosition, onComplete }) => {
 };
 
 // Mini sphere for personality traits visualization
-const MiniSphere = ({ traits }) => {
+const MiniSphere = ({ traits, removedTrait }) => {
   const { moodColor } = useMood();
   const sphereRef = useRef<THREE.Mesh>();
   const [particles, setParticles] = useState([]);
+  const previousTraitsCount = useRef(traits.length);
   
-  // Add particle animation when traits change
+  // Handle traits change - either addition or removal
   useEffect(() => {
-    if (traits.length > 0) {
-      const lastTrait = traits[traits.length - 1];
+    // Addition of a trait
+    if (traits.length > previousTraitsCount.current) {
+      const id = Date.now().toString();
       // Generate random position outside sphere
       const randomPosition = [
         (Math.random() - 0.5) * 5,
         (Math.random() - 0.5) * 5,
         (Math.random() - 0.5) * 5
       ];
-      
-      const id = Date.now().toString();
-      setParticles(prev => [...prev, { id, position: randomPosition }]);
+      setParticles(prev => [...prev, { id, position: randomPosition, isRemoval: false }]);
     }
-  }, [traits]);
+    
+    // Removal of a trait
+    if (removedTrait && traits.length < previousTraitsCount.current) {
+      const id = Date.now().toString();
+      // Generate random position outside sphere for the particle to travel to
+      const randomDestination = [
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 5,
+        (Math.random() - 0.5) * 5
+      ];
+      setParticles(prev => [...prev, { id, position: randomDestination, isRemoval: true }]);
+    }
+    
+    previousTraitsCount.current = traits.length;
+  }, [traits, removedTrait]);
   
   // Remove particle when animation completes
   const removeParticle = (id) => {
@@ -83,7 +108,9 @@ const MiniSphere = ({ traits }) => {
     
     // Pulse effect based on number of traits
     const pulse = Math.sin(clock.getElapsedTime() * 2) * 0.03 + 1;
-    const baseScale = 0.5 + (traits.length * 0.05);
+    
+    // Dynamic size based on number of traits - more traits = larger sphere
+    const baseScale = 0.5 + (traits.length * 0.1); // Increased scaling factor for more noticeable effect
     sphereRef.current.scale.set(
       baseScale * pulse, 
       baseScale * pulse, 
@@ -113,6 +140,7 @@ const MiniSphere = ({ traits }) => {
           position={particle.position}
           targetPosition={[0, 0, 0]}
           onComplete={() => removeParticle(particle.id)}
+          isRemoval={particle.isRemoval}
         />
       ))}
       
@@ -156,6 +184,7 @@ const PersonalityTree: React.FC = () => {
     "Creative", "Analytical", "Empathetic"
   ]);
   const [newTrait, setNewTrait] = useState("");
+  const [removedTrait, setRemovedTrait] = useState<string | null>(null);
   
   const handleAddTrait = () => {
     if (newTrait.trim() && !traits.includes(newTrait.trim())) {
@@ -165,7 +194,16 @@ const PersonalityTree: React.FC = () => {
   };
   
   const removeTrait = (index: number) => {
+    // Set the removed trait to trigger the outgoing animation
+    setRemovedTrait(traits[index]);
+    
+    // Then remove it from the array
     setTraits(traits.filter((_, i) => i !== index));
+    
+    // Reset after a moment so we can track new removals
+    setTimeout(() => {
+      setRemovedTrait(null);
+    }, 100);
   };
 
   return (
@@ -179,7 +217,7 @@ const PersonalityTree: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="min-h-[300px] bg-black/5 dark:bg-white/5 rounded-lg overflow-hidden">
             <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-              <MiniSphere traits={traits} />
+              <MiniSphere traits={traits} removedTrait={removedTrait} />
               <OrbitControls 
                 enableZoom={false}
                 enablePan={false}
@@ -203,7 +241,7 @@ const PersonalityTree: React.FC = () => {
               </Button>
             </div>
             
-            <div className="space-y-2 max-h-[240px] overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-[240px] overflow-y-auto scrollbar-none pr-2">
               {traits.map((trait, index) => (
                 <TreeNode 
                   key={index} 
