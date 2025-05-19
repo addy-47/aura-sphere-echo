@@ -52,7 +52,8 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
       const isLeftSwipe = distance > minSwipeDistance;
       const isRightSwipe = distance < -minSwipeDistance;
       
-      const routes = ['/', '/chat', '/customize', '/dashboard'];
+      // Updated routes array - removed '/customize'
+      const routes = ['/', '/chat', '/dashboard'];
       const currentIndex = routes.indexOf(location.pathname);
       
       if (isLeftSwipe && currentIndex < routes.length - 1) {
@@ -119,7 +120,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
             </Link>
           </div>
 
-          {/* Desktop navigation - simplified with just direct links */}
+          {/* Desktop navigation - removed Customize menu item */}
           {!isMobile && (
             <NavigationMenu className="hidden md:flex mx-auto">
               <NavigationMenuList>
@@ -154,21 +155,6 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <Link to="/customize">
-                    <NavigationMenuLink
-                      className={cn(
-                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                        location.pathname === "/customize" 
-                          ? "bg-accent text-accent-foreground" 
-                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
-                      )}
-                    >
-                      Customize
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
                   <Link to="/dashboard">
                     <NavigationMenuLink
                       className={cn(
@@ -187,7 +173,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
           )}
 
           <div className="flex items-center gap-2">
-            {/* Mobile menu - enhanced with improved UI */}
+            {/* Mobile menu - removed Customize menu item */}
             {isMobile ? (
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
@@ -220,15 +206,6 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                             : 'hover:bg-secondary/10'}`}
                       >
                         Chat
-                      </Link>
-                      <Link 
-                        to="/customize" 
-                        className={`flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium transition-colors
-                          ${location.pathname === '/customize' 
-                            ? 'bg-primary/10 text-primary' 
-                            : 'hover:bg-secondary/10'}`}
-                      >
-                        Customize
                       </Link>
                       <Link 
                         to="/dashboard" 
