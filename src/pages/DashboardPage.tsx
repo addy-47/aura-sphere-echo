@@ -1,11 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button'; // Add missing Button import
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
 import { 
@@ -14,19 +13,28 @@ import {
   Users, 
   Settings, 
   MessageSquare, 
-  LineChart, 
   Calendar, 
   ArrowUp,
   ArrowDown,
   Layers,
   Bell,
   Check,
-  X
+  X,
+  Link,
+  LinkIcon,
+  Github,
+  Twitter,
+  Linkedin,
+  Mail,
+  Globe,
+  Circle,
+  CircleDot
 } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import SpotifyIcon from '../components/icons/SpotifyIcon';
 import { Switch } from '@/components/ui/switch';
 import { Toggle } from '@/components/ui/toggle';
+import PersonalityTree from '../components/PersonalityTree';
 
 const data = [
   { name: 'Jan', value: 40 },
@@ -91,9 +99,152 @@ const activityData = [
   }
 ];
 
+const connectionsData = [
+  { 
+    id: 1, 
+    name: 'Spotify', 
+    icon: <SpotifyIcon className="h-5 w-5 text-green-500" />, 
+    status: 'Connected',
+    lastSync: '2 hours ago' 
+  },
+  { 
+    id: 2, 
+    name: 'GitHub', 
+    icon: <Github className="h-5 w-5 text-purple-500" />, 
+    status: 'Connected',
+    lastSync: '1 day ago' 
+  },
+  { 
+    id: 3, 
+    name: 'Twitter', 
+    icon: <Twitter className="h-5 w-5 text-blue-500" />, 
+    status: 'Disconnected',
+    lastSync: 'Never' 
+  },
+  { 
+    id: 4, 
+    name: 'LinkedIn', 
+    icon: <Linkedin className="h-5 w-5 text-blue-700" />, 
+    status: 'Connected',
+    lastSync: '3 days ago' 
+  },
+  { 
+    id: 5, 
+    name: 'Google Mail', 
+    icon: <Mail className="h-5 w-5 text-red-500" />, 
+    status: 'Connected',
+    lastSync: '12 hours ago' 
+  },
+  { 
+    id: 6, 
+    name: 'Personal Website', 
+    icon: <Globe className="h-5 w-5 text-teal-500" />, 
+    status: 'Pending',
+    lastSync: 'Never' 
+  },
+];
+
 const DashboardPage = () => {
   const { theme } = useTheme();
   const { moodColor } = useMood();
+  
+  // State for dashboard layout and chart style
+  const [dashboardLayout, setDashboardLayout] = useState<'standard' | 'compact' | 'expanded'>('standard');
+  const [chartStyle, setChartStyle] = useState<'area' | 'line' | 'bar'>('area');
+  
+  // Function to render the appropriate chart based on selected style
+  const renderChart = () => {
+    switch(chartStyle) {
+      case 'line':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={data}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+              <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <YAxis tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+                  borderColor: theme === 'dark' ? '#333333' : '#e2e8f0',
+                  color: theme === 'dark' ? '#ffffff' : '#000000'
+                }} 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="value" 
+                stroke={moodColor} 
+                strokeWidth={2}
+                dot={{ fill: moodColor }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      
+      case 'bar':
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+              <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <YAxis tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+                  borderColor: theme === 'dark' ? '#333333' : '#e2e8f0',
+                  color: theme === 'dark' ? '#ffffff' : '#000000'
+                }} 
+              />
+              <Bar 
+                dataKey="value" 
+                fill={moodColor} 
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
+      default: // 'area'
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={data}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={moodColor} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={moodColor} stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+              <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <YAxis tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+                  borderColor: theme === 'dark' ? '#333333' : '#e2e8f0',
+                  color: theme === 'dark' ? '#ffffff' : '#000000'
+                }} 
+              />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke={moodColor} 
+                fillOpacity={1} 
+                fill="url(#colorValue)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+    }
+  };
   
   return (
     <Layout>
@@ -107,12 +258,18 @@ const DashboardPage = () => {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="connections">Connections</TabsTrigger>
+            <TabsTrigger value="personality">Personality</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-8 mt-6">
             {/* Analytics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className={`grid grid-cols-1 ${
+              dashboardLayout === 'compact' ? 'md:grid-cols-4 gap-2' : 
+              dashboardLayout === 'expanded' ? 'md:grid-cols-2 gap-6' : 
+              'md:grid-cols-2 lg:grid-cols-4 gap-4'
+            }`}>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">Total Interactions</CardTitle>
@@ -174,42 +331,17 @@ const DashboardPage = () => {
               </CardHeader>
               <CardContent>
                 <AspectRatio ratio={16/6} className="bg-background">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={data}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={moodColor} stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor={moodColor} stopOpacity={0.1}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                      <XAxis dataKey="name" tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
-                      <YAxis tick={{ fill: theme === 'dark' ? '#ffffff' : '#000000' }} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
-                          borderColor: theme === 'dark' ? '#333333' : '#e2e8f0',
-                          color: theme === 'dark' ? '#ffffff' : '#000000'
-                        }} 
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke={moodColor} 
-                        fillOpacity={1} 
-                        fill="url(#colorValue)" 
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  {renderChart()}
                 </AspectRatio>
               </CardContent>
             </Card>
             
             {/* AI Features Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${
+              dashboardLayout === 'compact' ? 'md:grid-cols-2 gap-2' : 
+              dashboardLayout === 'expanded' ? 'md:grid-cols-1 gap-6' : 
+              'md:grid-cols-2 gap-4'
+            }`}>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -295,9 +427,15 @@ const DashboardPage = () => {
             
             {/* Connected Services */}
             <Card>
-              <CardHeader>
-                <CardTitle>Connected Services</CardTitle>
-                <CardDescription>Manage your linked accounts</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Connected Services</CardTitle>
+                  <CardDescription>Manage your linked accounts</CardDescription>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Link className="h-4 w-4 mr-1" />
+                  Add New
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
@@ -313,7 +451,42 @@ const DashboardPage = () => {
                     </CardFooter>
                   </Card>
                   
-                  {/* More service cards would go here */}
+                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Github className="h-5 w-5" />
+                        <span>GitHub</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0">
+                      <p className="text-xs text-muted-foreground">Connected</p>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Twitter className="h-5 w-5 text-blue-500" />
+                        <span>Twitter</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">Disconnected</p>
+                      <Button variant="outline" size="sm" className="h-7 text-xs">Connect</Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Mail className="h-5 w-5 text-red-500" />
+                        <span>Gmail</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0">
+                      <p className="text-xs text-muted-foreground">Connected</p>
+                    </CardFooter>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
@@ -410,6 +583,67 @@ const DashboardPage = () => {
             </Card>
           </TabsContent>
           
+          {/* New Connections Tab */}
+          <TabsContent value="connections" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Connected Accounts & Services</CardTitle>
+                <CardDescription>Manage your external service integrations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {connectionsData.map((connection) => (
+                    <div key={connection.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div className="p-2 rounded-full bg-secondary/20">
+                        {connection.icon}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <p className="font-medium">{connection.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {connection.status === 'Connected' ? (
+                            <CircleDot className="h-3 w-3 text-green-500" />
+                          ) : connection.status === 'Pending' ? (
+                            <Circle className="h-3 w-3 text-amber-500" />
+                          ) : (
+                            <Circle className="h-3 w-3 text-gray-400" />
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {connection.status} • Last sync: {connection.lastSync}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        variant={connection.status === 'Connected' ? "outline" : "default"} 
+                        size="sm"
+                      >
+                        {connection.status === 'Connected' ? 'Disconnect' : 'Connect'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-8">
+                  <h3 className="text-lg font-medium mb-4">Add New Connection</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {['Slack', 'Discord', 'Notion', 'Dropbox'].map((service) => (
+                      <Button key={service} variant="outline" className="h-auto py-6 flex flex-col gap-2">
+                        <LinkIcon className="h-6 w-6" />
+                        <span>{service}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* New Personality Tab */}
+          <TabsContent value="personality" className="mt-6">
+            <PersonalityTree />
+          </TabsContent>
+          
           <TabsContent value="settings" className="mt-6 space-y-6">
             {/* Settings content - improved and filled in */}
             <Card>
@@ -472,13 +706,28 @@ const DashboardPage = () => {
                   <div className="flex flex-col gap-3">
                     <p className="text-sm font-medium">Dashboard Layout</p>
                     <div className="flex flex-wrap gap-2">
-                      <Toggle variant="outline" aria-label="Toggle compact" defaultPressed>
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Standard layout"
+                        pressed={dashboardLayout === 'standard'}
+                        onClick={() => setDashboardLayout('standard')}
+                      >
                         <p className="text-xs">Standard</p>
                       </Toggle>
-                      <Toggle variant="outline" aria-label="Toggle compact">
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Compact layout"
+                        pressed={dashboardLayout === 'compact'}
+                        onClick={() => setDashboardLayout('compact')}
+                      >
                         <p className="text-xs">Compact</p>
                       </Toggle>
-                      <Toggle variant="outline" aria-label="Toggle compact">
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Expanded layout"
+                        pressed={dashboardLayout === 'expanded'}
+                        onClick={() => setDashboardLayout('expanded')}
+                      >
                         <p className="text-xs">Expanded</p>
                       </Toggle>
                     </div>
@@ -487,13 +736,28 @@ const DashboardPage = () => {
                   <div className="flex flex-col gap-3">
                     <p className="text-sm font-medium">Graph Style</p>
                     <div className="flex flex-wrap gap-2">
-                      <Toggle variant="outline" aria-label="Toggle compact" defaultPressed>
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Area chart"
+                        pressed={chartStyle === 'area'}
+                        onClick={() => setChartStyle('area')}
+                      >
                         <p className="text-xs">Area</p>
                       </Toggle>
-                      <Toggle variant="outline" aria-label="Toggle compact">
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Line chart"
+                        pressed={chartStyle === 'line'}
+                        onClick={() => setChartStyle('line')}
+                      >
                         <p className="text-xs">Line</p>
                       </Toggle>
-                      <Toggle variant="outline" aria-label="Toggle compact">
+                      <Toggle 
+                        variant="outline" 
+                        aria-label="Bar chart"
+                        pressed={chartStyle === 'bar'}
+                        onClick={() => setChartStyle('bar')}
+                      >
                         <p className="text-xs">Bar</p>
                       </Toggle>
                     </div>

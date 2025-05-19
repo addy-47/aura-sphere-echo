@@ -22,16 +22,20 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
     time: { value: 0 },
     resolution: { value: new THREE.Vector2(1, 1) },
     baseColor: { value: new THREE.Color(moodColor) },
-    pulseIntensity: { value: isProcessing ? 1.0 : 0.5 }
+    pulseIntensity: { value: isProcessing ? 1.0 : 0.5 },
+    isDark: { value: true }
   }), [moodColor, isProcessing]);
   
   // Custom vertex and fragment shaders for gradient effects
   const vertexShader = `
     varying vec2 vUv;
     varying vec3 vNormal;
+    varying vec3 vPosition;
+    
     void main() {
       vUv = uv;
       vNormal = normalize(normalMatrix * normal);
+      vPosition = position;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
@@ -41,41 +45,83 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
     uniform vec2 resolution;
     uniform vec3 baseColor;
     uniform float pulseIntensity;
+    uniform bool isDark;
+    
     varying vec2 vUv;
     varying vec3 vNormal;
+    varying vec3 vPosition;
     
-    // Simple perlin-like noise function
+    // Simple noise function
     float noise(vec3 p) {
       return fract(sin(dot(p, vec3(12.9898, 78.233, 45.5432))) * 43758.5453);
     }
     
     void main() {
-      // Create animated gradient based on normal, time, and mood color
-      vec3 color1 = baseColor;
-      vec3 color2 = baseColor * 1.5; // Brighter version of base color
-      vec3 color3 = vec3(1.0, 1.0, 1.0) * 0.8; // Near white
+      // Create a sleek, glass-like sphere with subtle refraction
+      vec3 normal = normalize(vNormal);
       
-      // Animate colors
-      float noise1 = noise(vNormal * 5.0 + time * 0.2);
-      float noise2 = noise(vNormal * 10.0 - time * 0.1);
+      // Create reflection effect
+      float fresnel = pow(1.0 - max(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0), 5.0);
       
-      // Create ripple effect
-      float ripple = sin(length(vNormal) * 20.0 + time) * 0.5 + 0.5;
-      ripple *= pulseIntensity;
+      // Create glossy effect
+      vec3 viewDir = normalize(vec3(0.0, 0.0, 1.0) - vPosition);
+      vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+      vec3 halfwayDir = normalize(lightDir + viewDir);
+      float specular = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
       
-      // Mix all elements for final color
-      vec3 finalColor = mix(
-        mix(color1, color2, noise1), 
-        color3, 
-        noise2 * ripple * 0.5
-      );
+      // Create subtle environment texture
+      float noiseVal = noise(vNormal * 5.0 + time * 0.1) * 0.1;
       
-      // Add rim lighting effect
-      float rim = 1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
-      rim = pow(rim, 3.0) * 0.5 * pulseIntensity;
-      finalColor += vec3(1.0) * rim;
+      // Create colorful bands based on angle
+      float angle = atan(vPosition.y, vPosition.x);
+      float rings = sin(angle * 10.0 + time) * 0.1 + 0.9;
       
-      gl_FragColor = vec4(finalColor, 1.0);
+      // Create subtle waves
+      float waves = sin(vPosition.y * 20.0 + time) * 0.05 + 0.95;
+      
+      // Create gradient based on position
+      float yGradient = vPosition.y * 0.5 + 0.5;
+      
+      // Final color calculation
+      vec3 glassColor = vec3(0.9, 0.95, 1.0); // Slight blue tint for glass
+      
+      // Blend black and white with slight color tint
+      vec3 finalColor;
+      if (isDark) {
+        // Dark mode (like image)
+        finalColor = mix(
+          vec3(0.1, 0.1, 0.15), // Deep blue-black
+          vec3(0.9, 0.95, 1.0), // Bright white-blue
+          fresnel * rings * waves
+        );
+      } else {
+        // Light mode
+        finalColor = mix(
+          vec3(0.8, 0.85, 0.9), // Light gray-blue
+          vec3(1.0, 1.0, 1.0), // Pure white
+          fresnel * rings * waves
+        );
+      }
+      
+      // Add subtle color tint based on mood
+      finalColor = mix(finalColor, baseColor, 0.05);
+      
+      // Add specular highlight
+      finalColor += vec3(specular) * 0.3;
+      
+      // Add subtle noise texture
+      finalColor *= (1.0 - noiseVal);
+      
+      // Create a smooth glass edge effect
+      float edge = 1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0)));
+      edge = smoothstep(0.3, 1.0, edge);
+      
+      // Create glow around the edge
+      vec3 edgeGlow = mix(baseColor, vec3(1.0), 0.5) * edge * 0.5;
+      finalColor += edgeGlow;
+      
+      // Final output
+      gl_FragColor = vec4(finalColor, 0.9); // Slightly transparent
     }
   `;
 
@@ -106,12 +152,25 @@ const AnimatedSphere = ({ isProcessing }: SphereProps) => {
 
   return (
     <mesh ref={sphereRef}>
-      <sphereGeometry args={[1, 64, 64]} />
+      <sphereGeometry args={[1, 128, 128]} />
       <shaderMaterial 
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}
+        transparent={true}
       />
+      
+      {/* Additional outer glow sphere */}
+      <mesh>
+        <sphereGeometry args={[1.02, 32, 32]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.2}
+          transparent={true}
+          opacity={0.1}
+        />
+      </mesh>
     </mesh>
   );
 };
@@ -161,12 +220,17 @@ const Sphere3D: React.FC<SphereProps> = ({ isProcessing }) => {
           gl={{ 
             antialias: true,
             powerPreference: 'default',
-            failIfMajorPerformanceCaveat: false
+            failIfMajorPerformanceCaveat: false,
+            alpha: true
           }}
         >
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
-          <pointLight position={[-10, -10, -5]} intensity={0.5} />
+          {/* Dark environment for reflection */}
+          <color attach="background" args={['#000000']} />
+          
+          {/* Subtle lighting */}
+          <ambientLight intensity={0.2} />
+          <pointLight position={[10, 10, 10]} intensity={0.5} />
+          <pointLight position={[-10, -10, -5]} intensity={0.2} color="#3366ff" />
           
           <AnimatedSphere isProcessing={isProcessing} />
           
