@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -18,23 +17,6 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  // Add favicon configuration
-  build: {
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-      },
-    },
-  },
-  // This ensures our favicon.svg is properly processed
-  experimental: {
-    renderBuiltUrl(filename) {
-      if (filename.includes('favicon.svg')) {
-        return { relative: true };
-      }
-      return { relative: true };
     },
   },
 }));
