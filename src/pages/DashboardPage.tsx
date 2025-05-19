@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Star, 
   Clock, 
@@ -157,6 +158,9 @@ const DashboardPage = () => {
   const [dashboardLayout, setDashboardLayout] = useState<'standard' | 'compact' | 'expanded'>('standard');
   const [chartStyle, setChartStyle] = useState<'area' | 'line' | 'bar'>('area');
   
+  // State for active tab to manage redirection
+  const [activeTab, setActiveTab] = useState('overview');
+  
   // State for customization features (moved from CustomizePage)
   const [aiName, setAiName] = useState('Neura');
   const [notifications, setNotifications] = useState(true);
@@ -187,6 +191,11 @@ const DashboardPage = () => {
   const handleDeleteMacro = (id: string) => {
     setMacros(macros.filter(macro => macro.id !== id));
     toast.success('Macro deleted successfully!');
+  };
+  
+  // Function to handle redirecting to connections tab
+  const handleAddNewConnection = () => {
+    setActiveTab('connections');
   };
   
   // Function to render the appropriate chart based on selected style
@@ -291,16 +300,18 @@ const DashboardPage = () => {
           <p className="text-muted-foreground">Monitor your AI activity and insights</p>
         </div>
 
-        <Tabs defaultValue="overview" className="mb-8">
-          <TabsList className="relative overflow-auto scrollbar-none">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="connections">Connections</TabsTrigger>
-            <TabsTrigger value="personality">Personality</TabsTrigger>
-            <TabsTrigger value="macros">Macros</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <ScrollArea className="w-full relative">
+            <TabsList className="inline-flex w-full sm:w-auto">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="connections">Connections</TabsTrigger>
+              <TabsTrigger value="personality">Personality</TabsTrigger>
+              <TabsTrigger value="macros">Macros</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+          </ScrollArea>
           
           <TabsContent value="overview" className="space-y-8 mt-6">
             {/* Analytics Cards */}
@@ -464,68 +475,36 @@ const DashboardPage = () => {
               </Card>
             </div>
             
-            {/* Connected Services */}
+            {/* Connected Services (Modified to only show connected services) */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Connected Services</CardTitle>
                   <CardDescription>Manage your linked accounts</CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleAddNewConnection}>
                   <Link className="h-4 w-4 mr-1" />
                   Add New
                 </Button>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
-                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <SpotifyIcon className="h-5 w-5 text-green-500" />
-                        <span>Spotify</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0">
-                      <p className="text-xs text-muted-foreground">Connected</p>
-                    </CardFooter>
-                  </Card>
-                  
-                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Github className="h-5 w-5" />
-                        <span>GitHub</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0">
-                      <p className="text-xs text-muted-foreground">Connected</p>
-                    </CardFooter>
-                  </Card>
-                  
-                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Twitter className="h-5 w-5 text-blue-500" />
-                        <span>Twitter</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                      <p className="text-xs text-muted-foreground">Disconnected</p>
-                      <Button variant="outline" size="sm" className="h-7 text-xs">Connect</Button>
-                    </CardFooter>
-                  </Card>
-                  
-                  <Card className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Mail className="h-5 w-5 text-red-500" />
-                        <span>Gmail</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0">
-                      <p className="text-xs text-muted-foreground">Connected</p>
-                    </CardFooter>
-                  </Card>
+                  {connectionsData
+                    .filter(conn => conn.status === 'Connected')
+                    .slice(0, 4) // Show only first 4 connected services
+                    .map(conn => (
+                      <Card key={conn.id} className="w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]">
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            {conn.icon}
+                            <span>{conn.name}</span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardFooter className="p-4 pt-0">
+                          <p className="text-xs text-muted-foreground">Connected • {conn.lastSync}</p>
+                        </CardFooter>
+                      </Card>
+                    ))}
                 </div>
               </CardContent>
             </Card>
