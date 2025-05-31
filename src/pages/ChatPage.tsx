@@ -9,7 +9,7 @@ import { Send, ChevronUp, ChevronDown } from 'lucide-react';
 import * as THREE from 'three';
 import { useIsMobile } from '../hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Sphere3D from '../components/Sphere3D';
+import GlassSphere from '../components/GlassSphere';
 
 // Ensure THREE is available globally
 if (typeof window !== 'undefined' && !window.THREE) {
@@ -117,10 +117,10 @@ const ChatPage = () => {
     return (
       <Layout hideFooter={true}>
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
-          {/* Simplified Sphere (takes full screen on mobile) */}
+          {/* Glass Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
             <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '50vh' }}>
-              <Sphere3D isProcessing={isProcessing} />
+              <GlassSphere isProcessing={isProcessing} />
             </div>
           </div>
           
@@ -221,10 +221,10 @@ const ChatPage = () => {
   return (
     <Layout hideFooter={true}>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
-        {/* Simple Sphere */}
+        {/* Glass Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>
-            <Sphere3D isProcessing={isProcessing} />
+            <GlassSphere isProcessing={isProcessing} />
           </Card>
         </div>
         
