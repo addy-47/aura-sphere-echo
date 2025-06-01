@@ -6,7 +6,7 @@ import Layout from '../components/Layout';
 import { useMood } from '../contexts/MoodContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from '../components/Logo';
-import { ArrowRight, Home, MessageCircle, BarChart3, Shield, FileText } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
   const { moodColor } = useMood();
@@ -25,42 +25,6 @@ const Index = () => {
             opacity: theme === 'dark' ? 0.15 : 0.1
           }}
         />
-        
-        {/* Symmetrical Navigation Pills - Above sphere */}
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 flex items-center gap-8 z-10">
-          <Link 
-            to="/" 
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
-          >
-            <Home size={16} />
-            <span className="text-sm font-medium">Home</span>
-          </Link>
-          
-          <Link 
-            to="/chat" 
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
-          >
-            <MessageCircle size={16} />
-            <span className="text-sm font-medium">Chat</span>
-          </Link>
-          
-          <Link 
-            to="/dashboard" 
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
-          >
-            <BarChart3 size={16} />
-            <span className="text-sm font-medium">Dashboard</span>
-          </Link>
-        </div>
         
         <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8">
           {/* Main Hero Text - Centered */}
@@ -108,31 +72,6 @@ const Index = () => {
           >
             <span>Get Started</span>
             <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-        </div>
-
-        {/* Symmetrical Footer Pills - Below sphere */}
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex items-center gap-8 z-10">
-          <Link 
-            to="/privacy" 
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
-          >
-            <Shield size={16} />
-            <span className="text-sm font-medium">Privacy</span>
-          </Link>
-          
-          <Link 
-            to="/terms" 
-            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
-                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
-          >
-            <FileText size={16} />
-            <span className="text-sm font-medium">Terms</span>
           </Link>
         </div>
       </div>

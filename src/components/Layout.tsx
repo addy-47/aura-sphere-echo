@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Moon, Sun, Menu } from 'lucide-react';
@@ -120,56 +119,58 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
             </Link>
           </div>
 
-          {/* Desktop navigation - removed Customize menu item */}
+          {/* Desktop navigation - centered with equal spacing */}
           {!isMobile && (
-            <NavigationMenu className="hidden md:flex mx-auto">
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <Link to="/">
-                    <NavigationMenuLink
-                      className={cn(
-                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                        location.pathname === "/" 
-                          ? "bg-accent text-accent-foreground" 
-                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
-                      )}
-                    >
-                      Home
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <NavigationMenu className="hidden md:flex">
+                <NavigationMenuList className="flex items-center gap-8">
+                  <NavigationMenuItem>
+                    <Link to="/">
+                      <NavigationMenuLink
+                        className={cn(
+                          "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                          location.pathname === "/" 
+                            ? "bg-accent text-accent-foreground" 
+                            : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                        )}
+                      >
+                        Home
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
 
-                <NavigationMenuItem>
-                  <Link to="/chat">
-                    <NavigationMenuLink
-                      className={cn(
-                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                        location.pathname === "/chat" 
-                          ? "bg-accent text-accent-foreground" 
-                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
-                      )}
-                    >
-                      Chat
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link to="/chat">
+                      <NavigationMenuLink
+                        className={cn(
+                          "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                          location.pathname === "/chat" 
+                            ? "bg-accent text-accent-foreground" 
+                            : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                        )}
+                      >
+                        Chat
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
 
-                <NavigationMenuItem>
-                  <Link to="/dashboard">
-                    <NavigationMenuLink
-                      className={cn(
-                        "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-                        location.pathname === "/dashboard" 
-                          ? "bg-accent text-accent-foreground" 
-                          : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
-                      )}
-                    >
-                      Dashboard
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+                  <NavigationMenuItem>
+                    <Link to="/dashboard">
+                      <NavigationMenuLink
+                        className={cn(
+                          "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+                          location.pathname === "/dashboard" 
+                            ? "bg-accent text-accent-foreground" 
+                            : "text-foreground/60 hover:text-foreground hover:bg-accent/50"
+                        )}
+                      >
+                        Dashboard
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
           )}
 
           <div className="flex items-center gap-2">
@@ -260,7 +261,7 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
         {children}
       </main>
 
-      {/* Footer - improved responsive layout */}
+      {/* Footer - centered Privacy and Terms links */}
       {!hideFooter && (
         <footer className="py-6 px-4 border-t mt-auto">
           <div className="container mx-auto">
@@ -270,8 +271,16 @@ const Layout: React.FC<LayoutProps> = ({ children, minimal = false, hideFooter =
                 <Logo size="sm" withText={true} />
               </div>
               
-              {/* Links centered */}
-              <div className="flex flex-wrap gap-6 text-sm justify-center">
+              {/* Links centered with equal spacing */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex">
+                <div className="flex items-center gap-8 text-sm">
+                  <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+                  <Link to="/terms" className="hover:underline">Terms of Service</Link>
+                </div>
+              </div>
+              
+              {/* Mobile centered links */}
+              <div className="flex gap-6 text-sm justify-center md:hidden">
                 <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
                 <Link to="/terms" className="hover:underline">Terms of Service</Link>
               </div>
