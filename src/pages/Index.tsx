@@ -6,7 +6,7 @@ import Layout from '../components/Layout';
 import { useMood } from '../contexts/MoodContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from '../components/Logo';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Home, MessageCircle, BarChart3, Shield, FileText } from 'lucide-react';
 
 const Index = () => {
   const { moodColor } = useMood();
@@ -16,6 +16,7 @@ const Index = () => {
     <Layout minimal>
       <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-64px)] text-center px-6 py-12 relative overflow-hidden 
         ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-800'}`}>
+        
         {/* Starry background effect with CSS */}
         <div className="absolute inset-0 overflow-hidden z-0" 
           style={{
@@ -24,6 +25,42 @@ const Index = () => {
             opacity: theme === 'dark' ? 0.15 : 0.1
           }}
         />
+        
+        {/* Symmetrical Navigation Pills - Above sphere */}
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 flex items-center gap-8 z-10">
+          <Link 
+            to="/" 
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
+              ${theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
+          >
+            <Home size={16} />
+            <span className="text-sm font-medium">Home</span>
+          </Link>
+          
+          <Link 
+            to="/chat" 
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
+              ${theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
+          >
+            <MessageCircle size={16} />
+            <span className="text-sm font-medium">Chat</span>
+          </Link>
+          
+          <Link 
+            to="/dashboard" 
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
+              ${theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
+          >
+            <BarChart3 size={16} />
+            <span className="text-sm font-medium">Dashboard</span>
+          </Link>
+        </div>
         
         <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8">
           {/* Main Hero Text - Centered */}
@@ -39,13 +76,13 @@ const Index = () => {
             An AI-powered digital reflection that evolves with your personality
           </p>
           
-          {/* Enhanced 3D Sphere representation with consistent color in both themes */}
+          {/* Enhanced 3D Sphere representation - CENTERED */}
           <div className="my-12 flex justify-center items-center w-full">
             <div 
               className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-2 md:mb-4 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105"
               style={{ 
                 background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
-                backgroundColor: '#1a1a1a', // Same dark color for both themes
+                backgroundColor: '#1a1a1a',
                 boxShadow: '0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1)'
               }}
             >
@@ -58,7 +95,7 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Get Started Button - Centered with hover animation */}
+          {/* Get Started Button - Centered */}
           <Link 
             to="/signin" 
             className="mt-16 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-white font-medium
@@ -71,6 +108,31 @@ const Index = () => {
           >
             <span>Get Started</span>
             <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
+
+        {/* Symmetrical Footer Pills - Below sphere */}
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex items-center gap-8 z-10">
+          <Link 
+            to="/privacy" 
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
+              ${theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
+          >
+            <Shield size={16} />
+            <span className="text-sm font-medium">Privacy</span>
+          </Link>
+          
+          <Link 
+            to="/terms" 
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
+              ${theme === 'dark' 
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' 
+                : 'bg-black/10 hover:bg-black/20 text-gray-800 border border-black/20'}`}
+          >
+            <FileText size={16} />
+            <span className="text-sm font-medium">Terms</span>
           </Link>
         </div>
       </div>
