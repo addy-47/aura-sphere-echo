@@ -119,16 +119,26 @@ const ChatPage = () => {
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
           {/* Glass Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
-            <div className="w-full h-full rounded-xl overflow-hidden" style={{ minHeight: '50vh' }}>
+            <div 
+              className="w-full h-full rounded-xl overflow-hidden border transition-all duration-300" 
+              style={{ 
+                minHeight: '50vh',
+                background: 'rgba(var(--card), 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderColor: moodColor + '30',
+                boxShadow: `0 10px 30px ${moodColor}20`
+              }}
+            >
               <GlassSphere isProcessing={isProcessing} />
             </div>
           </div>
           
           {/* Expandable chat interface - Improved positioning */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out bg-background backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0 pb-safe`}
+            className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out backdrop-blur-xl shadow-lg rounded-t-2xl border-t-0 pb-safe`}
             style={{
               height: chatExpanded ? '60vh' : '4rem',
+              background: 'rgba(var(--background), 0.95)',
               boxShadow: `0 -5px 20px ${moodColor}20`,
               borderColor: moodColor + '30',
               paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' // Safe area for notched phones with minimum padding
@@ -136,9 +146,12 @@ const ChatPage = () => {
           >
             {/* Chat toggle button - Moved above the text */}
             <button 
-              className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-background rounded-t-xl border flex items-center justify-center shadow-md z-10"
+              className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-12 h-8 rounded-t-xl border flex items-center justify-center shadow-md z-10 transition-all duration-300"
               onClick={() => setChatExpanded(!chatExpanded)}
-              style={{ borderColor: moodColor + '30' }}
+              style={{ 
+                background: 'rgba(var(--background), 0.95)',
+                borderColor: moodColor + '30' 
+              }}
             >
               {chatExpanded ? <ChevronDown /> : <ChevronUp />}
             </button>
@@ -223,14 +236,30 @@ const ChatPage = () => {
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
         {/* Glass Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
-          <Card className="w-full h-full overflow-hidden rounded-xl shadow-xl border-0 glassmorphism" style={{ boxShadow: `0 10px 30px ${moodColor}30` }}>
+          <div 
+            className="w-full h-full overflow-hidden rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl" 
+            style={{ 
+              background: 'rgba(var(--card), 0.95)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 10px 30px ${moodColor}30`,
+              borderColor: moodColor + '30'
+            }}
+          >
             <GlassSphere isProcessing={isProcessing} />
-          </Card>
+          </div>
         </div>
         
         {/* Chat Interface */}
         <div className="w-full md:w-1/2 flex flex-col">
-          <Card className="flex-1 rounded-xl shadow-xl border-0 glassmorphism flex flex-col" style={{ boxShadow: `0 10px 30px ${moodColor}20` }}>
+          <div 
+            className="flex-1 rounded-xl shadow-xl border flex flex-col transition-all duration-300" 
+            style={{ 
+              background: 'rgba(var(--card), 0.95)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 10px 30px ${moodColor}20`,
+              borderColor: moodColor + '30'
+            }}
+          >
             {/* Chat messages */}
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
@@ -286,7 +315,7 @@ const ChatPage = () => {
                 <p className="text-xs text-muted-foreground mt-2 animate-pulse">Neura is thinking...</p>
               )}
             </form>
-          </Card>
+          </div>
         </div>
       </div>
     </Layout>
