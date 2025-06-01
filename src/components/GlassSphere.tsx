@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -22,9 +21,11 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const uniforms = useMemo(() => ({
     time: { value: 0 },
     isDark: { value: theme === 'dark' },
-    glowColor: { value: new THREE.Color('#ffffff') }, // White glow
-    rimColor: { value: new THREE.Color('#e0e0e0') }, // Light gray rim
+    glowColor: { value: new THREE.Color('#ffffff') },
+    rimColor: { value: new THREE.Color('#e0e0e0') },
     baseColor: { value: new THREE.Color(theme === 'dark' ? '#020205' : '#f5f5f5') },
+    centerColor: { value: new THREE.Color('#000000') }, // Pure black center
+    edgeColor: { value: new THREE.Color('#404040') }, // Greyish black edge
     opacity: { value: theme === 'dark' ? 0.15 : 0.8 },
     rimPower: { value: 2.0 },
     glowIntensity: { value: isProcessing ? 0.8 : 0.4 },
@@ -37,9 +38,11 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
     varying vec3 vViewPosition;
     varying vec2 vUv;
     varying vec3 vWorldPosition;
+    varying vec3 vPosition;
     
     void main() {
       vUv = uv;
+      vPosition = position;
       vNormal = normalize(normalMatrix * normal);
       vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
       vViewPosition = -mvPosition.xyz;
@@ -48,13 +51,15 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Custom fragment shader for glass effect
+  // Custom fragment shader for glass effect with gradient
   const fragmentShader = `
     uniform float time;
     uniform bool isDark;
     uniform vec3 glowColor;
     uniform vec3 rimColor;
     uniform vec3 baseColor;
+    uniform vec3 centerColor;
+    uniform vec3 edgeColor;
     uniform float opacity;
     uniform float rimPower;
     uniform float glowIntensity;
@@ -64,6 +69,7 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
     varying vec3 vViewPosition;
     varying vec2 vUv;
     varying vec3 vWorldPosition;
+    varying vec3 vPosition;
     
     void main() {
       vec3 normal = normalize(vNormal);
@@ -76,26 +82,42 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
       // Enhanced fresnel for hover effect
       float hoverFresnel = fresnel * (1.0 + isHovered * 0.5);
       
+      // Distance from center for gradient effect
+      float distanceFromCenter = length(vPosition);
+      float normalizedDistance = distanceFromCenter; // Since sphere radius is 1
+      
+      // Create gradient from center (black) to edge (greyish black)
+      vec3 gradientColor = mix(centerColor, edgeColor, normalizedDistance);
+      
       // Subtle noise pattern for glass texture
       float noise = sin(vWorldPosition.x * 10.0 + time) * 0.02 + 
                    sin(vWorldPosition.y * 15.0 + time * 0.8) * 0.02 +
                    sin(vWorldPosition.z * 12.0 + time * 0.6) * 0.02;
       
-      // Glass base color with slight variation
-      vec3 finalBaseColor = baseColor + vec3(noise);
+      // Apply theme-based coloring
+      vec3 finalBaseColor;
+      if (isDark) {
+        finalBaseColor = gradientColor + vec3(noise);
+      } else {
+        // Invert for light mode - center should be light, edges darker
+        vec3 lightCenterColor = vec3(0.95, 0.95, 0.95); // Light greyish white
+        vec3 lightEdgeColor = vec3(0.6, 0.6, 0.6); // Darker grey
+        finalBaseColor = mix(lightCenterColor, lightEdgeColor, normalizedDistance) + vec3(noise);
+      }
       
-      // Enhanced rim lighting with white glow
-      vec3 rimLight = glowColor * hoverFresnel * (glowIntensity + isHovered * 0.3);
+      // Enhanced rim lighting with theme-appropriate glow
+      vec3 finalGlowColor = isDark ? vec3(1.0, 1.0, 1.0) : vec3(0.2, 0.2, 0.2); // White for dark, dark grey for light
+      vec3 rimLight = finalGlowColor * hoverFresnel * (glowIntensity + isHovered * 0.3);
       
       // Subtle internal glow
-      float centerGlow = 1.0 - length(vUv - 0.5) * 2.0;
+      float centerGlow = 1.0 - normalizedDistance;
       centerGlow = smoothstep(0.3, 1.0, centerGlow) * 0.15;
       
       // Pulsing effect when processing
       float pulse = 1.0 + sin(time * 3.0) * 0.1;
       
-      // Final color combining base, rim light, and glow
-      vec3 finalColor = finalBaseColor + (rimLight * pulse) + (glowColor * centerGlow);
+      // Final color combining gradient base, rim light, and glow
+      vec3 finalColor = finalBaseColor + (rimLight * pulse) + (finalGlowColor * centerGlow);
       
       // Enhanced opacity with hover effect
       float finalOpacity = opacity + hoverFresnel * 0.6 + isHovered * 0.2;
@@ -117,10 +139,6 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
     // Update shader uniforms
     uniforms.time.value = time;
     uniforms.isDark.value = theme === 'dark';
-    uniforms.baseColor.value.setHex(theme === 'dark' ? 0x020205 : 0xf5f5f5);
-    uniforms.glowColor.value.setHex(theme === 'dark' ? 0xffffff : 0x2a2a2a);
-    uniforms.rimColor.value.setHex(theme === 'dark' ? 0xe0e0e0 : 0x505050);
-    uniforms.opacity.value = theme === 'dark' ? 0.15 : 0.8;
     uniforms.glowIntensity.value = isProcessing 
       ? 0.8 + Math.sin(time * 3) * 0.2 
       : 0.4;
@@ -128,44 +146,56 @@ const AnimatedGlassSphere = ({ isProcessing = false }: GlassSphereProps) => {
   });
 
   return (
-    <group 
-      ref={groupRef}
-      onPointerEnter={() => setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
-    >
-      {/* Main glass sphere */}
-      <mesh ref={sphereRef} castShadow receiveShadow>
-        <sphereGeometry args={[1, 128, 128]} />
-        <shaderMaterial 
-          vertexShader={vertexShader}
-          fragmentShader={fragmentShader}
-          uniforms={uniforms}
-          transparent={true}
-          side={THREE.DoubleSide}
+    <>
+      {/* Stationary ground plane for shadows - positioned outside the rotating group */}
+      <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[10, 10]} />
+        <meshStandardMaterial 
+          color={theme === 'dark' ? "#1a1a1a" : "#e0e0e0"} 
+          transparent 
+          opacity={0.1} 
         />
       </mesh>
       
-      {/* Outer glow ring effect */}
-      <mesh scale={[1.02, 1.02, 1.02]} castShadow>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshBasicMaterial
-          color={theme === 'dark' ? "#ffffff" : "#2a2a2a"}
-          transparent={true}
-          opacity={theme === 'dark' ? 0.08 : 0.12}
-          side={THREE.BackSide}
-        />
-      </mesh>
-      
-      {/* Very subtle inner reflection */}
-      <mesh scale={[0.98, 0.98, 0.98]}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial
-          color={theme === 'dark' ? "#e0e0e0" : "#505050"}
-          transparent={true}
-          opacity={0.03}
-        />
-      </mesh>
-    </group>
+      <group 
+        ref={groupRef}
+        onPointerEnter={() => setIsHovered(true)}
+        onPointerLeave={() => setIsHovered(false)}
+      >
+        {/* Main glass sphere */}
+        <mesh ref={sphereRef} castShadow receiveShadow>
+          <sphereGeometry args={[1, 128, 128]} />
+          <shaderMaterial 
+            vertexShader={vertexShader}
+            fragmentShader={fragmentShader}
+            uniforms={uniforms}
+            transparent={true}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        
+        {/* Outer glow ring effect */}
+        <mesh scale={[1.02, 1.02, 1.02]} castShadow>
+          <sphereGeometry args={[1, 64, 64]} />
+          <meshBasicMaterial
+            color={theme === 'dark' ? "#ffffff" : "#2a2a2a"}
+            transparent={true}
+            opacity={theme === 'dark' ? 0.08 : 0.12}
+            side={THREE.BackSide}
+          />
+        </mesh>
+        
+        {/* Very subtle inner reflection */}
+        <mesh scale={[0.98, 0.98, 0.98]}>
+          <sphereGeometry args={[1, 32, 32]} />
+          <meshBasicMaterial
+            color={theme === 'dark' ? "#e0e0e0" : "#505050"}
+            transparent={true}
+            opacity={0.03}
+          />
+        </mesh>
+      </group>
+    </>
   );
 };
 
@@ -234,16 +264,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             intensity={0.1} 
             color={theme === 'dark' ? "#ffffff" : "#666666"}
           />
-          
-          {/* Ground plane for shadows */}
-          <mesh position={[0, -2, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[10, 10]} />
-            <meshStandardMaterial 
-              color={theme === 'dark' ? "#1a1a1a" : "#e0e0e0"} 
-              transparent 
-              opacity={0.1} 
-            />
-          </mesh>
           
           <AnimatedGlassSphere isProcessing={isProcessing} />
           
