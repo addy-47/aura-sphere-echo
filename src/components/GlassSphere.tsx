@@ -209,8 +209,11 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           gl={{ 
             antialias: true,
             alpha: true,
-            powerPreference: 'default',
-            shadowMap: true
+            powerPreference: 'default'
+          }}
+          onCreated={({ gl }) => {
+            gl.shadowMap.enabled = true;
+            gl.shadowMap.type = THREE.PCFSoftShadowMap;
           }}
         >
           {/* Dynamic background based on theme */}
