@@ -123,7 +123,7 @@ const ChatPage = () => {
               className="w-full h-full rounded-xl overflow-hidden border transition-all duration-300" 
               style={{ 
                 minHeight: '50vh',
-                background: 'rgba(var(--card), 0.95)',
+                background: 'rgba(30, 30, 35, 0.95)',
                 backdropFilter: 'blur(10px)',
                 borderColor: moodColor + '30',
                 boxShadow: `0 10px 30px ${moodColor}20`
@@ -239,7 +239,7 @@ const ChatPage = () => {
           <div 
             className="w-full h-full overflow-hidden rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl" 
             style={{ 
-              background: 'rgba(var(--card), 0.95)',
+              background: 'rgba(30, 30, 35, 0.95)',
               backdropFilter: 'blur(10px)',
               boxShadow: `0 10px 30px ${moodColor}30`,
               borderColor: moodColor + '30'
