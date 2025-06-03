@@ -28,9 +28,9 @@ const ParticleField = ({ count = 200 }: { count?: number }) => {
     
     for (let i = 0; i < count; i++) {
       // Position particles around the sphere
-      positions[i * 3] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      positions[i * 3] = (Math.random() - 0.5) * 6; // Reduced range for smaller sphere
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 6;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
       
       // 90% white/grey particles, 10% subtle blue
       if (Math.random() < 0.1) {
@@ -73,7 +73,7 @@ const ParticleField = ({ count = 200 }: { count?: number }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.01}
+        size={0.008}
         transparent
         opacity={0.6}
         sizeAttenuation
@@ -88,14 +88,16 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const { theme } = useTheme();
   
   // Shader uniforms for the dark sphere effect
   const uniforms = useMemo(() => ({
     time: { value: 0 },
     opacity: { value: 0.95 },
     rimIntensity: { value: isProcessing ? 0.8 : 0.4 },
-    isHovered: { value: isHovered ? 1.0 : 0.0 }
-  }), [isProcessing, isHovered]);
+    isHovered: { value: isHovered ? 1.0 : 0.0 },
+    isLightMode: { value: theme === 'light' ? 1.0 : 0.0 }
+  }), [isProcessing, isHovered, theme]);
   
   // Vertex shader
   const vertexShader = `
@@ -118,6 +120,7 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
     uniform float opacity;
     uniform float rimIntensity;
     uniform float isHovered;
+    uniform float isLightMode;
     
     varying vec3 vNormal;
     varying vec3 vViewPosition;
@@ -131,17 +134,25 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
       float fresnel = 1.0 - abs(dot(normal, viewDir));
       fresnel = pow(fresnel, 2.0);
       
-      // Base dark color - almost black
-      vec3 baseColor = vec3(0.05, 0.05, 0.08);
+      // Pure black core for both modes
+      vec3 baseColor = vec3(0.0, 0.0, 0.0);
       
-      // Rim lighting - subtle white/blue glow
-      vec3 rimColor = mix(vec3(0.8, 0.85, 0.9), vec3(0.6, 0.7, 0.9), 0.3);
+      // Rim lighting - adapts to theme
+      vec3 rimColor;
+      if (isLightMode > 0.5) {
+        // Light mode - darker rim
+        rimColor = mix(vec3(0.3, 0.3, 0.4), vec3(0.4, 0.5, 0.6), 0.5);
+      } else {
+        // Dark mode - brighter rim
+        rimColor = mix(vec3(0.8, 0.85, 0.9), vec3(0.6, 0.7, 0.9), 0.3);
+      }
+      
       vec3 rim = rimColor * fresnel * rimIntensity;
       
       // Subtle pulsing for processing state
       float pulse = sin(time * 2.0) * 0.1 + 0.9;
       
-      // Final color
+      // Final color - pure black core with rim
       vec3 finalColor = baseColor + rim * pulse;
       
       // Add slight brightness on hover
@@ -159,7 +170,7 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
     
     // Subtle rotation
     groupRef.current.rotation.y = time * 0.05;
-    groupRef.current.position.y = Math.sin(time * 0.4) * 0.05;
+    groupRef.current.position.y = Math.sin(time * 0.4) * 0.03; // Reduced movement
     
     // Update uniforms
     uniforms.time.value = time;
@@ -167,31 +178,33 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
       ? 0.6 + Math.sin(time * 3) * 0.2 
       : 0.4;
     uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
+    uniforms.isLightMode.value = theme === 'light' ? 1.0 : 0.0;
   });
 
   return (
     <>
       {/* Minimal particle field */}
-      <ParticleField count={150} />
+      <ParticleField count={100} />
       
       {/* Very few sparkles */}
       <Sparkles
-        count={20}
-        scale={[4, 4, 4]}
-        size={1}
+        count={15}
+        scale={[3, 3, 3]}
+        size={0.8}
         speed={0.2}
         color="#ffffff"
-        opacity={0.3}
+        opacity={0.2}
       />
       
-      {/* Main sphere group */}
-      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.1}>
+      {/* Main sphere group - made smaller */}
+      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.08}>
         <group 
           ref={groupRef}
+          scale={[0.7, 0.7, 0.7]} // Made sphere smaller
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
         >
-          {/* Main dark sphere */}
+          {/* Main dark sphere with pure black core */}
           <mesh ref={sphereRef} castShadow>
             <sphereGeometry args={[1, 128, 128]} />
             <shaderMaterial 
@@ -207,15 +220,15 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
           <mesh scale={[1.01, 1.01, 1.01]}>
             <sphereGeometry args={[1, 64, 64]} />
             <MeshTransmissionMaterial
-              transmission={0.1}
-              thickness={0.05}
-              roughness={0.8}
-              envMapIntensity={0.2}
+              transmission={0.05}
+              thickness={0.03}
+              roughness={0.9}
+              envMapIntensity={0.1}
               color="#000000"
               transparent={true}
-              opacity={0.1}
-              distortionScale={0.02}
-              temporalDistortion={0.02}
+              opacity={0.05}
+              distortionScale={0.01}
+              temporalDistortion={0.01}
             />
           </mesh>
         </group>
@@ -223,11 +236,11 @@ const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
       
       {/* Subtle contact shadows */}
       <ContactShadows
-        position={[0, -1.2, 0]}
-        opacity={0.15}
-        scale={4}
+        position={[0, -0.8, 0]} // Adjusted for smaller sphere
+        opacity={0.1}
+        scale={3}
         blur={2}
-        far={1.2}
+        far={0.8}
       />
     </>
   );
@@ -277,7 +290,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
     <div className="w-full h-full min-h-[300px] relative overflow-hidden">
       <ThreeErrorBoundary>
         <Canvas 
-          camera={{ position: [0, 0, 2.5], fov: 50 }}
+          camera={{ position: [0, 0, 2.2], fov: 45 }} // Adjusted camera for smaller sphere
           dpr={[1, 1.5]} 
           shadows
           gl={{ 
@@ -290,19 +303,19 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             gl.shadowMap.type = THREE.PCFSoftShadowMap;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
             gl.toneMappingExposure = 0.8;
-            // Very dark background like in the reference
-            scene.background = new THREE.Color('#0a0a0a');
+            // Background adapts to theme
+            scene.background = new THREE.Color(theme === 'light' ? '#f8f9fa' : '#0a0a0a');
           }}
         >
-          <color attach="background" args={['#0a0a0a']} />
+          <color attach="background" args={[theme === 'light' ? '#f8f9fa' : '#0a0a0a']} />
           
           {/* Minimal lighting */}
-          <ambientLight intensity={0.05} />
+          <ambientLight intensity={theme === 'light' ? 0.1 : 0.05} />
           
           {/* Key light for rim effect */}
           <pointLight 
             position={[3, 3, 3]} 
-            intensity={0.3} 
+            intensity={theme === 'light' ? 0.4 : 0.3} 
             color="#ffffff"
           />
           
@@ -317,14 +330,14 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           <Stars 
             radius={50}
             depth={30}
-            count={500}
+            count={300}
             factor={1}
             saturation={0}
             fade
             speed={0.1}
           />
           
-          <Environment preset="night" />
+          <Environment preset={theme === 'light' ? 'dawn' : 'night'} />
           
           <DarkSphere isProcessing={isProcessing} />
           
@@ -341,13 +354,13 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
       
       {/* UI overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-4 left-4 text-xs font-mono opacity-30 text-white">
+        <div className="absolute top-4 left-4 text-xs font-mono opacity-30" style={{ color: theme === 'light' ? '#666' : '#fff' }}>
           NEURAL_CORE_v1.0
         </div>
-        <div className="absolute bottom-4 right-4 text-xs font-mono opacity-30 text-white">
+        <div className="absolute bottom-4 right-4 text-xs font-mono opacity-30" style={{ color: theme === 'light' ? '#666' : '#fff' }}>
           {isProcessing ? 'PROCESSING...' : 'ONLINE'}
         </div>
-        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-white opacity-40 animate-pulse"></div>
+        <div className={`absolute top-4 right-4 w-2 h-2 rounded-full animate-pulse ${theme === 'light' ? 'bg-gray-600' : 'bg-white'} opacity-40`}></div>
       </div>
     </div>
   );
