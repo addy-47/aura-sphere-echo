@@ -299,7 +299,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       ? 1.2 + Math.sin(time * 4) * 0.3 
       : 0.6;
     uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
-    uniforms.glowColor.value.setHex(moodColor.replace('#', '0x'));
+    uniforms.glowColor.value.setHex(parseInt(moodColor.replace('#', '0x'), 16));
   });
 
   return (
@@ -365,14 +365,15 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
           <mesh scale={[1.05, 1.05, 1.05]}>
             <sphereGeometry args={[1, 64, 64]} />
             <MeshTransmissionMaterial
-              transmissionSampler={false}
               transmission={0.9}
               thickness={0.2}
               roughness={0.1}
               envMapIntensity={1}
-              color={moodColor}
+              color={new THREE.Color(moodColor)}
               transparent={true}
               opacity={0.15}
+              distortionScale={0}
+              temporalDistortion={0}
             />
           </mesh>
         </group>
