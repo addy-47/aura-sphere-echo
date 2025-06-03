@@ -18,25 +18,41 @@ interface GlassSphereProps {
   isProcessing?: boolean;
 }
 
-// Simplified particle system component
-const ParticleField = ({ count = 500 }: { count?: number }) => {
+// Minimal particle system with mostly white/grey particles and few blue ones
+const ParticleField = ({ count = 200 }: { count?: number }) => {
   const mesh = useRef<THREE.Points>(null);
-  const { theme } = useTheme();
   
-  const particlesPosition = useMemo(() => {
+  const { particlesPosition, particlesColors } = useMemo(() => {
     const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 15;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 15;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
+      // Position particles around the sphere
+      positions[i * 3] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      
+      // 90% white/grey particles, 10% subtle blue
+      if (Math.random() < 0.1) {
+        // Subtle blue particles
+        colors[i * 3] = 0.4;     // R
+        colors[i * 3 + 1] = 0.6; // G  
+        colors[i * 3 + 2] = 0.8; // B
+      } else {
+        // White/grey particles
+        const grey = 0.7 + Math.random() * 0.3;
+        colors[i * 3] = grey;
+        colors[i * 3 + 1] = grey;
+        colors[i * 3 + 2] = grey;
+      }
     }
-    return positions;
+    return { particlesPosition: positions, particlesColors: colors };
   }, [count]);
 
   useFrame(({ clock }) => {
     if (mesh.current) {
-      mesh.current.rotation.x = clock.getElapsedTime() * 0.02;
-      mesh.current.rotation.y = clock.getElapsedTime() * 0.01;
+      mesh.current.rotation.x = clock.getElapsedTime() * 0.01;
+      mesh.current.rotation.y = clock.getElapsedTime() * 0.008;
     }
   });
 
@@ -49,47 +65,45 @@ const ParticleField = ({ count = 500 }: { count?: number }) => {
           array={particlesPosition}
           itemSize={3}
         />
+        <bufferAttribute
+          attach="attributes-color"
+          count={particlesColors.length / 3}
+          array={particlesColors}
+          itemSize={3}
+        />
       </bufferGeometry>
       <pointsMaterial
-        size={0.015}
-        color={theme === 'dark' ? '#00ffff' : '#0066cc'}
+        size={0.01}
         transparent
-        opacity={0.4}
+        opacity={0.6}
         sizeAttenuation
+        vertexColors
       />
     </points>
   );
 };
 
-// Simplified holographic sphere
-const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
+// Dark sphere matching the reference image
+const DarkSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const innerSphereRef = useRef<THREE.Mesh>(null);
-  const { theme } = useTheme();
-  const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Simplified shader uniforms
+  // Shader uniforms for the dark sphere effect
   const uniforms = useMemo(() => ({
     time: { value: 0 },
-    isDark: { value: theme === 'dark' },
-    glowColor: { value: new THREE.Color(moodColor) },
-    rimColor: { value: new THREE.Color('#00ffff') },
-    opacity: { value: theme === 'dark' ? 0.3 : 0.8 },
-    glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
+    opacity: { value: 0.95 },
+    rimIntensity: { value: isProcessing ? 0.8 : 0.4 },
     isHovered: { value: isHovered ? 1.0 : 0.0 }
-  }), [theme, isProcessing, isHovered, moodColor]);
+  }), [isProcessing, isHovered]);
   
-  // Simplified vertex shader
+  // Vertex shader
   const vertexShader = `
     varying vec3 vNormal;
     varying vec3 vViewPosition;
-    varying vec2 vUv;
     varying vec3 vWorldPosition;
     
     void main() {
-      vUv = uv;
       vNormal = normalize(normalMatrix * normal);
       vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
       vViewPosition = -mvPosition.xyz;
@@ -98,107 +112,88 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Simplified fragment shader
+  // Fragment shader for dark sphere with rim lighting
   const fragmentShader = `
     uniform float time;
-    uniform bool isDark;
-    uniform vec3 glowColor;
-    uniform vec3 rimColor;
     uniform float opacity;
-    uniform float glowIntensity;
+    uniform float rimIntensity;
     uniform float isHovered;
     
     varying vec3 vNormal;
     varying vec3 vViewPosition;
-    varying vec2 vUv;
     varying vec3 vWorldPosition;
     
     void main() {
       vec3 normal = normalize(vNormal);
       vec3 viewDir = normalize(vViewPosition);
       
-      // Fresnel effect
+      // Fresnel effect for rim lighting
       float fresnel = 1.0 - abs(dot(normal, viewDir));
-      fresnel = pow(fresnel, 1.5);
+      fresnel = pow(fresnel, 2.0);
       
-      // Distance-based gradient
-      float distanceFromCenter = length(vWorldPosition) * 0.5;
+      // Base dark color - almost black
+      vec3 baseColor = vec3(0.05, 0.05, 0.08);
       
-      // Base color
-      vec3 baseColor;
-      if (isDark) {
-        baseColor = mix(vec3(0.0, 0.0, 0.1), vec3(0.0, 0.4, 0.6), distanceFromCenter);
-      } else {
-        baseColor = mix(vec3(0.9, 0.95, 1.0), vec3(0.3, 0.5, 0.8), distanceFromCenter);
-      }
+      // Rim lighting - subtle white/blue glow
+      vec3 rimColor = mix(vec3(0.8, 0.85, 0.9), vec3(0.6, 0.7, 0.9), 0.3);
+      vec3 rim = rimColor * fresnel * rimIntensity;
       
-      // Rim lighting
-      vec3 rimLight = rimColor * fresnel * glowIntensity;
-      
-      // Pulsing effect
-      float pulse = sin(time * 3.0) * 0.1 + 0.9;
+      // Subtle pulsing for processing state
+      float pulse = sin(time * 2.0) * 0.1 + 0.9;
       
       // Final color
-      vec3 finalColor = baseColor + rimLight * pulse;
-      finalColor += glowColor * 0.2 * (isHovered + 0.5);
+      vec3 finalColor = baseColor + rim * pulse;
       
-      // Final opacity
-      float finalOpacity = opacity + fresnel * 0.4 + isHovered * 0.2;
+      // Add slight brightness on hover
+      finalColor += vec3(0.1, 0.1, 0.15) * isHovered * 0.3;
       
-      gl_FragColor = vec4(finalColor, finalOpacity);
+      gl_FragColor = vec4(finalColor, opacity);
     }
   `;
 
-  // Animation
+  // Animation loop
   useFrame(({ clock }) => {
     if (!sphereRef.current || !groupRef.current) return;
     
     const time = clock.getElapsedTime();
     
-    // Rotation
-    groupRef.current.rotation.y = time * 0.1;
-    groupRef.current.position.y = Math.sin(time * 0.6) * 0.1;
-    
-    // Inner sphere rotation
-    if (innerSphereRef.current) {
-      innerSphereRef.current.rotation.x = -time * 0.2;
-      innerSphereRef.current.rotation.y = time * 0.3;
-    }
+    // Subtle rotation
+    groupRef.current.rotation.y = time * 0.05;
+    groupRef.current.position.y = Math.sin(time * 0.4) * 0.05;
     
     // Update uniforms
     uniforms.time.value = time;
-    uniforms.isDark.value = theme === 'dark';
-    uniforms.glowIntensity.value = isProcessing 
-      ? 1.0 + Math.sin(time * 3) * 0.2 
-      : 0.5;
+    uniforms.rimIntensity.value = isProcessing 
+      ? 0.6 + Math.sin(time * 3) * 0.2 
+      : 0.4;
     uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
-    uniforms.glowColor.value.setHex(parseInt(moodColor.replace('#', '0x'), 16));
   });
 
   return (
     <>
-      {/* Particle field background */}
-      <ParticleField count={400} />
+      {/* Minimal particle field */}
+      <ParticleField count={150} />
       
-      {/* Sparkles */}
+      {/* Very few sparkles */}
       <Sparkles
-        count={50}
-        scale={[3, 3, 3]}
-        size={1.5}
-        speed={0.3}
-        color={theme === 'dark' ? '#00ffff' : '#0066cc'}
+        count={20}
+        scale={[4, 4, 4]}
+        size={1}
+        speed={0.2}
+        color="#ffffff"
+        opacity={0.3}
       />
       
       {/* Main sphere group */}
-      <Float speed={1.0} rotationIntensity={0.1} floatIntensity={0.2}>
+      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.1}>
         <group 
           ref={groupRef}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
         >
-          {/* Main sphere */}
+          {/* Main dark sphere */}
           <mesh ref={sphereRef} castShadow>
-            <sphereGeometry args={[1, 64, 64]} />
+            <sphereGeometry args={[1, 128, 128]} />
             <shaderMaterial 
               vertexShader={vertexShader}
               fragmentShader={fragmentShader}
@@ -208,47 +203,37 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             />
           </mesh>
           
-          {/* Inner energy core */}
-          <mesh ref={innerSphereRef} scale={[0.2, 0.2, 0.2]}>
-            <sphereGeometry args={[1, 16, 16]} />
-            <meshBasicMaterial
-              color={moodColor}
-              transparent={true}
-              opacity={0.6}
-            />
-          </mesh>
-          
-          {/* Transmission sphere for glass effect */}
-          <mesh scale={[1.02, 1.02, 1.02]}>
-            <sphereGeometry args={[1, 32, 32]} />
+          {/* Subtle transmission layer for glass effect */}
+          <mesh scale={[1.01, 1.01, 1.01]}>
+            <sphereGeometry args={[1, 64, 64]} />
             <MeshTransmissionMaterial
-              transmission={0.8}
-              thickness={0.1}
-              roughness={0.2}
-              envMapIntensity={0.8}
-              color={moodColor}
+              transmission={0.1}
+              thickness={0.05}
+              roughness={0.8}
+              envMapIntensity={0.2}
+              color="#000000"
               transparent={true}
-              opacity={0.2}
-              distortionScale={0.1}
-              temporalDistortion={0.1}
+              opacity={0.1}
+              distortionScale={0.02}
+              temporalDistortion={0.02}
             />
           </mesh>
         </group>
       </Float>
       
-      {/* Contact shadows */}
+      {/* Subtle contact shadows */}
       <ContactShadows
-        position={[0, -1.5, 0]}
-        opacity={0.2}
-        scale={6}
-        blur={1.5}
-        far={1.5}
+        position={[0, -1.2, 0]}
+        opacity={0.15}
+        scale={4}
+        blur={2}
+        far={1.2}
       />
     </>
   );
 };
 
-// Simplified error boundary
+// Error boundary component
 class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {
     super(props);
@@ -269,7 +254,7 @@ class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {h
         <div className="flex items-center justify-center h-full text-center p-4">
           <div className="text-muted-foreground">
             <div className="text-lg mb-2">Sphere Loading...</div>
-            <div className="text-sm">Initializing 3D visualization</div>
+            <div className="text-sm">Initializing visualization</div>
           </div>
         </div>
       );
@@ -292,75 +277,77 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
     <div className="w-full h-full min-h-[300px] relative overflow-hidden">
       <ThreeErrorBoundary>
         <Canvas 
-          camera={{ position: [0, 0, 3], fov: 50 }}
+          camera={{ position: [0, 0, 2.5], fov: 50 }}
           dpr={[1, 1.5]} 
           shadows
           gl={{ 
             antialias: true,
             alpha: true,
-            powerPreference: 'high-performance',
-            preserveDrawingBuffer: false,
-            stencil: false,
-            depth: true
+            powerPreference: 'high-performance'
           }}
           onCreated={({ gl, scene }) => {
             gl.shadowMap.enabled = true;
             gl.shadowMap.type = THREE.PCFSoftShadowMap;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 1.0;
-            scene.background = new THREE.Color(theme === 'dark' ? '#000008' : '#f8f9fa');
+            gl.toneMappingExposure = 0.8;
+            // Very dark background like in the reference
+            scene.background = new THREE.Color('#0a0a0a');
           }}
         >
-          <color attach="background" args={[theme === 'dark' ? '#000008' : '#f8f9fa']} />
+          <color attach="background" args={['#0a0a0a']} />
           
-          <ambientLight intensity={theme === 'dark' ? 0.1 : 0.3} />
+          {/* Minimal lighting */}
+          <ambientLight intensity={0.05} />
           
+          {/* Key light for rim effect */}
           <pointLight 
-            position={[2, 2, 2]} 
-            intensity={0.5} 
-            color="#00aaff"
-          />
-          
-          <pointLight 
-            position={[-2, -1, 1]} 
+            position={[3, 3, 3]} 
             intensity={0.3} 
-            color="#ff3366"
+            color="#ffffff"
           />
           
+          {/* Subtle blue accent light */}
+          <pointLight 
+            position={[-2, -1, 2]} 
+            intensity={0.1} 
+            color="#4a90e2"
+          />
+          
+          {/* Very minimal stars */}
           <Stars 
-            radius={30}
-            depth={20}
-            count={1000}
-            factor={2}
-            saturation={0.5}
+            radius={50}
+            depth={30}
+            count={500}
+            factor={1}
+            saturation={0}
             fade
-            speed={0.3}
+            speed={0.1}
           />
           
-          <Environment preset="dawn" />
+          <Environment preset="night" />
           
-          <HolographicSphere isProcessing={isProcessing} />
+          <DarkSphere isProcessing={isProcessing} />
           
           <OrbitControls 
             enableZoom={false}
             enablePan={false}
-            rotateSpeed={0.3}
+            rotateSpeed={0.2}
             autoRotate={false}
             enableDamping
-            dampingFactor={0.05}
+            dampingFactor={0.03}
           />
         </Canvas>
       </ThreeErrorBoundary>
       
       {/* UI overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-4 left-4 text-xs font-mono opacity-50">
+        <div className="absolute top-4 left-4 text-xs font-mono opacity-30 text-white">
           NEURAL_CORE_v1.0
         </div>
-        <div className="absolute bottom-4 right-4 text-xs font-mono opacity-50">
+        <div className="absolute bottom-4 right-4 text-xs font-mono opacity-30 text-white">
           {isProcessing ? 'PROCESSING...' : 'ONLINE'}
         </div>
-        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-green-400 animate-pulse opacity-60"></div>
+        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-white opacity-40 animate-pulse"></div>
       </div>
     </div>
   );
