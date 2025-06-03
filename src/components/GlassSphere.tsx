@@ -226,9 +226,11 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
               thickness={0.1}
               roughness={0.2}
               envMapIntensity={0.8}
-              color={new THREE.Color(moodColor)}
+              color={moodColor}
               transparent={true}
               opacity={0.2}
+              distortionScale={0.1}
+              temporalDistortion={0.1}
             />
           </mesh>
         </group>
