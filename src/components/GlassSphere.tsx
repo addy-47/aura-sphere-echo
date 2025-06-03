@@ -4,12 +4,6 @@ import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
   OrbitControls, 
   Environment, 
-  EffectComposer, 
-  Bloom, 
-  ChromaticAberration,
-  DepthOfField,
-  Noise,
-  Vignette,
   BakeShadows,
   ContactShadows,
   Float,
@@ -21,6 +15,14 @@ import {
   Stars,
   Trail
 } from '@react-three/drei';
+import { 
+  EffectComposer, 
+  Bloom, 
+  ChromaticAberration,
+  DepthOfField,
+  Noise,
+  Vignette
+} from '@react-three/postprocessing';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
 import * as THREE from 'three';
