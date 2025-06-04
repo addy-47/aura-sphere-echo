@@ -226,9 +226,9 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
         vec3 darkEdge = vec3(0.0, 0.3, 0.4);
         gradientColor = mix(darkCenter, darkEdge, normalizedDistance);
       } else {
-        // Light mode: bright center to blue edge
-        vec3 lightCenter = vec3(0.95, 0.98, 1.0);
-        vec3 lightEdge = vec3(0.4, 0.6, 0.9);
+        // Light mode: bright center to blue edge with better contrast
+        vec3 lightCenter = vec3(0.85, 0.92, 1.0);
+        vec3 lightEdge = vec3(0.2, 0.5, 0.8);
         gradientColor = mix(lightCenter, lightEdge, normalizedDistance);
       }
       
