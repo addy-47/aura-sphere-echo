@@ -103,7 +103,7 @@ const WaveSphere = ({ isProcessing = false }: GlassSphereProps) => {
     waveIntensity: { value: isProcessing ? 1.0 : 0.3 }
   }), [isProcessing, isHovered, theme]);
   
-  // Enhanced vertex shader with wave distortions
+  // Enhanced vertex shader with wave distortions exactly like the reference code
   const vertexShader = `
     uniform float time;
     uniform float amplitude;
@@ -116,7 +116,7 @@ const WaveSphere = ({ isProcessing = false }: GlassSphereProps) => {
     varying vec3 vWorldPosition;
     varying float vWaveHeight;
     
-    // Wave function similar to the provided code
+    // Wave function exactly like the reference code
     float getWaveHeight(vec3 position) {
       float theta = position.y * frequency + time * speed;
       float phi = position.x * frequency + time * speed * 0.7;
@@ -170,9 +170,6 @@ const WaveSphere = ({ isProcessing = false }: GlassSphereProps) => {
       // Fresnel effect for rim lighting
       float fresnel = 1.0 - abs(dot(normal, viewDir));
       fresnel = pow(fresnel, 2.0);
-      
-      // Distance from center for gradient
-      float distanceFromCenter = length(gl_PointCoord - vec2(0.5)) * 2.0;
       
       vec3 baseColor;
       vec3 rimColor;
@@ -369,15 +366,14 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
         >
           <color attach="background" args={[theme === 'light' ? '#f8f9fa' : '#0a0a0a']} />
           
-          {/* Minimal lighting without shadows */}
+          {/* Minimal lighting */}
           <ambientLight intensity={theme === 'light' ? 0.3 : 0.08} />
           
-          {/* Key light for rim effect - no shadows */}
+          {/* Key light for rim effect */}
           <pointLight 
             position={[4, 4, 4]} 
             intensity={theme === 'light' ? 0.7 : 0.4} 
             color="#ffffff"
-            castShadow={false}
           />
           
           {/* Subtle blue accent light */}
@@ -385,7 +381,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             position={[-3, -2, 3]} 
             intensity={0.2} 
             color="#4a90e2"
-            castShadow={false}
           />
           
           {/* Enhanced stars */}
