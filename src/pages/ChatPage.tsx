@@ -117,13 +117,13 @@ const ChatPage = () => {
     return (
       <Layout hideFooter={true}>
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
-          {/* Glass Sphere with blackish grey background */}
+          {/* Glass Sphere (takes full screen on mobile) */}
           <div className="flex-grow w-full">
             <div 
               className="w-full h-full rounded-xl overflow-hidden border transition-all duration-300" 
               style={{ 
                 minHeight: '50vh',
-                background: '#1a1a1a', // Blackish grey background
+                background: 'rgba(var(--card), 0.95)',
                 backdropFilter: 'blur(10px)',
                 borderColor: moodColor + '30',
                 boxShadow: `0 10px 30px ${moodColor}20`
@@ -234,12 +234,12 @@ const ChatPage = () => {
   return (
     <Layout hideFooter={true}>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
-        {/* Glass Sphere with blackish grey background */}
+        {/* Glass Sphere */}
         <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
           <div 
-            className="w-full h-full overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-2xl" 
+            className="w-full h-full overflow-hidden rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl" 
             style={{ 
-              background: '#1a1a1a', // Blackish grey background
+              background: 'rgba(var(--card), 0.95)',
               backdropFilter: 'blur(10px)',
               boxShadow: `0 10px 30px ${moodColor}30`,
               borderColor: moodColor + '30'
