@@ -11,6 +11,7 @@ import {
 } from '@react-three/drei';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
+import { SphereLoader } from './ui/sphere-loader';
 import * as THREE from 'three';
 
 interface GlassSphereProps {
@@ -329,12 +330,25 @@ class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {h
 // Main component
 const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
   const { theme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.THREE) {
       window.THREE = THREE;
     }
+    
+    // Simulate loading time for better UX
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
   }, []);
+
+  // Show loader while loading
+  if (isLoading) {
+    return <SphereLoader />;
+  }
 
   return (
     <div className="w-full h-full min-h-[300px] relative overflow-hidden">
