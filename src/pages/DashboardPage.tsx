@@ -16,7 +16,15 @@ import {
   BarChart3,
   Clock,
   Target,
-  Zap
+  Zap,
+  Bell,
+  Settings,
+  BookOpen,
+  Users,
+  Globe,
+  Mic,
+  Camera,
+  Music
 } from 'lucide-react';
 
 const DashboardPage = () => {
@@ -67,6 +75,27 @@ const DashboardPage = () => {
     { time: '5 hours ago', topic: 'Music Preferences', sentiment: 'excited' },
     { time: '1 day ago', topic: 'Travel Plans', sentiment: 'enthusiastic' },
     { time: '2 days ago', topic: 'Learning AI', sentiment: 'curious' },
+  ];
+
+  const notifications = [
+    { id: 1, title: 'New Feature Available', message: 'Voice recognition has been updated', time: '5 min ago', type: 'info' },
+    { id: 2, title: 'Personality Update', message: 'Your empathy score increased by 3%', time: '2 hours ago', type: 'success' },
+    { id: 3, title: 'Weekly Report', message: 'Your interaction summary is ready', time: '1 day ago', type: 'report' },
+    { id: 4, title: 'System Maintenance', message: 'Scheduled downtime tomorrow 2-4 AM', time: '2 days ago', type: 'warning' }
+  ];
+
+  const macros = [
+    { name: 'Morning Routine', description: 'Daily motivation and goal setting', usage: 23, icon: Calendar },
+    { name: 'Creative Session', description: 'Brainstorming and idea generation', usage: 18, icon: Brain },
+    { name: 'Study Helper', description: 'Learning assistance and note-taking', usage: 31, icon: BookOpen },
+    { name: 'Social Chat', description: 'Casual conversation and mood boost', usage: 45, icon: Users }
+  ];
+
+  const integrations = [
+    { name: 'Spotify', status: 'Connected', lastSync: '2 hours ago', icon: Music },
+    { name: 'Google Calendar', status: 'Connected', lastSync: '1 hour ago', icon: Calendar },
+    { name: 'Voice Assistant', status: 'Active', lastSync: 'Just now', icon: Mic },
+    { name: 'Camera Feed', status: 'Disconnected', lastSync: '3 days ago', icon: Camera }
   ];
 
   return (
@@ -187,7 +216,72 @@ const DashboardPage = () => {
           </Card>
         </div>
 
-        {/* Personality Insights */}
+        {/* Notifications and Macros Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Notifications */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" style={{ color: moodColor }} />
+                Notifications
+              </CardTitle>
+              <CardDescription>
+                Recent updates and alerts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {notifications.map((notification) => (
+                <div key={notification.id} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/50">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    notification.type === 'success' ? 'bg-green-500' :
+                    notification.type === 'warning' ? 'bg-yellow-500' :
+                    notification.type === 'report' ? 'bg-blue-500' :
+                    'bg-gray-500'
+                  }`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{notification.title}</p>
+                    <p className="text-xs text-muted-foreground">{notification.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Macros */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" style={{ color: moodColor }} />
+                Quick Macros
+              </CardTitle>
+              <CardDescription>
+                Your most used conversation starters
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {macros.map((macro, index) => {
+                const IconComponent = macro.icon;
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <IconComponent className="h-4 w-4" style={{ color: moodColor }} />
+                      <div>
+                        <p className="text-sm font-medium">{macro.name}</p>
+                        <p className="text-xs text-muted-foreground">{macro.description}</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {macro.usage} uses
+                    </Badge>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Personality Insights and Growth Goals */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -249,6 +343,39 @@ const DashboardPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Integrations Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" style={{ color: moodColor }} />
+              Connected Services
+            </CardTitle>
+            <CardDescription>
+              Manage your app integrations and connections
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {integrations.map((integration, index) => {
+                const IconComponent = integration.icon;
+                return (
+                  <div key={index} className="flex flex-col items-center p-4 rounded-lg bg-muted/50 text-center">
+                    <IconComponent className="h-8 w-8 mb-2" style={{ color: moodColor }} />
+                    <h3 className="font-medium text-sm">{integration.name}</h3>
+                    <Badge 
+                      variant={integration.status === 'Connected' || integration.status === 'Active' ? 'default' : 'secondary'}
+                      className="text-xs mt-1"
+                    >
+                      {integration.status}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">{integration.lastSync}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
@@ -175,18 +174,14 @@ const WaveSphere = ({ isProcessing = false }: GlassSphereProps) => {
       vec3 rimColor;
       
       if (isLightMode > 0.5) {
-        // Light mode - pure white center, light grey to darker grey on edges
-        float gradientFactor = pow(fresnel, 1.5);
+        // Light mode - darker center, lighter edges with proper contrast
+        float centerToDark = 1.0 - fresnel;
         baseColor = mix(
-          vec3(1.0, 1.0, 1.0),           // Pure white center
-          mix(
-            vec3(0.85, 0.85, 0.85),      // Light grey
-            vec3(0.4, 0.4, 0.4),         // Darker grey on edges
-            gradientFactor
-          ),
-          gradientFactor
+          vec3(0.3, 0.3, 0.3),      // Dark center
+          vec3(0.8, 0.8, 0.8),      // Light edges
+          fresnel * fresnel
         );
-        rimColor = vec3(0.6, 0.65, 0.7);  // Subtle blue-grey rim
+        rimColor = vec3(0.2, 0.3, 0.4);  // Dark blue-grey rim
       } else {
         // Dark mode - pure black center with rim
         baseColor = vec3(0.0, 0.0, 0.0);  // Pure black center
