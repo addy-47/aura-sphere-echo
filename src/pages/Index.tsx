@@ -20,13 +20,13 @@ const Index = () => {
         ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-800'}`}>
         
         {/* Minimal Particle Background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <Canvas 
             camera={{ position: [0, 0, 10], fov: 60 }}
-            gl={{ alpha: true, antialias: false }}
-            style={{ pointerEvents: 'none' }}
+            gl={{ alpha: true, antialias: false, powerPreference: "high-performance" }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
           >
-            <ParticleSystem count={200} size={0.01} opacity={0.3} speed={0.02} range={30} />
+            <ParticleSystem count={200} size={0.01} opacity={0.4} speed={0.02} range={30} />
           </Canvas>
         </div>
         
@@ -39,7 +39,7 @@ const Index = () => {
           }}
         />
         
-        <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8">
+        <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8 relative">
           {/* Main Hero Text - Centered */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter mb-2 text-center">
             Your Digital

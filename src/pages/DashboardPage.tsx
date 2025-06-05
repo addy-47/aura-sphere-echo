@@ -26,8 +26,15 @@ import {
   Users,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  Music,
+  Globe
 } from 'lucide-react';
+import SpotifyIcon from '../components/icons/SpotifyIcon';
 
 const DashboardPage = () => {
   const { mood, moodColor } = useMood();
@@ -272,44 +279,128 @@ const DashboardPage = () => {
 
   // Connections Tab Content
   const ConnectionsTab = () => {
+    const [customService, setCustomService] = useState('');
+    
+    const socialServices = [
+      { 
+        name: 'Facebook', 
+        icon: Facebook, 
+        color: '#1877F2', 
+        connected: true,
+        description: 'Social media integration'
+      },
+      { 
+        name: 'Instagram', 
+        icon: Instagram, 
+        color: '#E4405F', 
+        connected: false,
+        description: 'Photo and story sharing'
+      },
+      { 
+        name: 'WhatsApp', 
+        icon: MessageSquare, 
+        color: '#25D366', 
+        connected: true,
+        description: 'Messaging platform'
+      },
+      { 
+        name: 'Spotify', 
+        icon: Music, 
+        color: '#1DB954', 
+        connected: false,
+        description: 'Music streaming service'
+      },
+      { 
+        name: 'YouTube', 
+        icon: Youtube, 
+        color: '#FF0000', 
+        connected: true,
+        description: 'Video platform'
+      },
+      { 
+        name: 'X (Twitter)', 
+        icon: Twitter, 
+        color: '#000000', 
+        connected: false,
+        description: 'Social networking'
+      }
+    ];
+
     return (
       <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold">Connected Services</h3>
-          <p className="text-muted-foreground">Manage your integrations and data sources</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">Connected Services</h3>
+            <p className="text-muted-foreground">Manage your integrations and data sources</p>
+          </div>
         </div>
         
         <div className="grid gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <MessageSquare className="h-4 w-4 text-white" />
+          {socialServices.map((service, index) => {
+            const IconComponent = service.icon;
+            return (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                        style={{ backgroundColor: service.color }}
+                      >
+                        <IconComponent className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{service.name}</h4>
+                        <p className="text-sm text-muted-foreground">{service.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div 
+                            className={`w-2 h-2 rounded-full ${service.connected ? 'bg-green-500' : 'bg-gray-400'}`}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {service.connected ? 'Connected' : 'Not connected'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant={service.connected ? "outline" : "default"}>
+                      {service.connected ? 'Disconnect' : 'Connect'}
+                    </Button>
                   </div>
-                  <div>
-                    <h4 className="font-medium">Discord</h4>
-                    <p className="text-sm text-muted-foreground">Connected</p>
-                  </div>
-                </div>
-                <Button variant="outline">Disconnect</Button>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            );
+          })}
           
-          <Card>
+          {/* Add Custom Service */}
+          <Card className="border-dashed">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                    <Heart className="h-4 w-4 text-white" />
+                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div>
-                    <h4 className="font-medium">Health Data</h4>
-                    <p className="text-sm text-muted-foreground">Not connected</p>
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Enter custom service name..."
+                      value={customService}
+                      onChange={(e) => setCustomService(e.target.value)}
+                      className="border-none p-0 h-auto font-medium text-base focus-visible:ring-0"
+                    />
+                    <p className="text-sm text-muted-foreground">Add a custom integration</p>
                   </div>
                 </div>
-                <Button>Connect</Button>
+                <Button 
+                  disabled={!customService.trim()}
+                  onClick={() => {
+                    if (customService.trim()) {
+                      // Handle custom service addition
+                      setCustomService('');
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
+                </Button>
               </div>
             </CardContent>
           </Card>
