@@ -4,12 +4,6 @@ import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
   OrbitControls, 
   Environment, 
-  EffectComposer, 
-  Bloom, 
-  ChromaticAberration,
-  DepthOfField,
-  Noise,
-  Vignette,
   BakeShadows,
   ContactShadows,
   Float,
@@ -297,7 +291,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       ? 1.2 + Math.sin(time * 4) * 0.3 
       : 0.6;
     uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
-    uniforms.glowColor.value.setHex(moodColor.replace('#', '0x'));
+    uniforms.glowColor.value.setHex(parseInt(moodColor.replace('#', ''), 16));
   });
 
   return (
@@ -363,7 +357,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
           <mesh scale={[1.05, 1.05, 1.05]}>
             <sphereGeometry args={[1, 64, 64]} />
             <MeshTransmissionMaterial
-              transmissionSampler={false}
               transmission={0.9}
               thickness={0.2}
               roughness={0.1}
@@ -371,6 +364,8 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
               color={moodColor}
               transparent={true}
               opacity={0.15}
+              distortionScale={0}
+              temporalDistortion={0}
             />
           </mesh>
         </group>
@@ -407,7 +402,7 @@ class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {h
   }
 }
 
-// Main component with premium post-processing
+// Main component with enhanced rendering
 const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
   const { theme } = useTheme();
 
@@ -495,33 +490,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             enableDamping
             dampingFactor={0.05}
           />
-          
-          {/* Premium post-processing effects */}
-          <EffectComposer>
-            <Bloom 
-              intensity={theme === 'dark' ? 0.8 : 0.4}
-              luminanceThreshold={0.1}
-              luminanceSmoothing={0.9}
-              height={300}
-            />
-            <ChromaticAberration 
-              offset={new Vector2(0.0005, 0.0005)} 
-            />
-            <DepthOfField 
-              focusDistance={0}
-              focalLength={0.02}
-              bokehScale={2}
-              height={480}
-            />
-            <Noise 
-              opacity={theme === 'dark' ? 0.02 : 0.01}
-            />
-            <Vignette 
-              eskil={false}
-              offset={0.1}
-              darkness={theme === 'dark' ? 0.3 : 0.1}
-            />
-          </EffectComposer>
         </Canvas>
       </ThreeErrorBoundary>
       
