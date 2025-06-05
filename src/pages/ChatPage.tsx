@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import * as THREE from 'three';
 import { useIsMobile } from '../hooks/use-mobile';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import GlassSphere from '../components/GlassSphere';
+import LoaderComponent from '../components/LoaderComponent';
 
 // Ensure THREE is available globally
 if (typeof window !== 'undefined' && !window.THREE) {
@@ -35,11 +35,19 @@ const ChatPage = () => {
   ]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { mood, setMood, moodColor } = useMood();
   const isMobile = useIsMobile();
   const [chatExpanded, setChatExpanded] = useState(!isMobile);
-  const [lastResponse, setLastResponse] = useState("");
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -77,7 +85,6 @@ const ChatPage = () => {
       setTimeout(() => {
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
         resolve(randomResponse);
-        setLastResponse(randomResponse);
         setIsProcessing(false);
       }, 1500);
     });
@@ -117,8 +124,8 @@ const ChatPage = () => {
     return (
       <Layout hideFooter={true}>
         <div className="flex flex-col h-[calc(100vh-4rem)] relative">
-          {/* Glass Sphere (takes full screen on mobile) */}
-          <div className="flex-grow w-full">
+          {/* Glass Sphere with Loader */}
+          <div className="flex-grow w-full relative">
             <div 
               className="w-full h-full rounded-xl overflow-hidden border transition-all duration-300" 
               style={{ 
@@ -129,7 +136,8 @@ const ChatPage = () => {
                 boxShadow: `0 10px 30px ${moodColor}20`
               }}
             >
-              <GlassSphere isProcessing={isProcessing} />
+              <LoaderComponent isLoading={isLoading} />
+              {!isLoading && <GlassSphere isProcessing={isProcessing} />}
             </div>
           </div>
           
@@ -234,8 +242,8 @@ const ChatPage = () => {
   return (
     <Layout hideFooter={true}>
       <div className="flex flex-col md:flex-row gap-6 md:min-h-[calc(100vh-9rem)] mb-4 p-4">
-        {/* Glass Sphere */}
-        <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px]">
+        {/* Glass Sphere with Loader */}
+        <div className="w-full md:w-1/2 flex-none md:h-auto h-[300px] relative">
           <div 
             className="w-full h-full overflow-hidden rounded-xl shadow-xl border transition-all duration-300 hover:shadow-2xl" 
             style={{ 
@@ -245,7 +253,8 @@ const ChatPage = () => {
               borderColor: moodColor + '30'
             }}
           >
-            <GlassSphere isProcessing={isProcessing} />
+            <LoaderComponent isLoading={isLoading} />
+            {!isLoading && <GlassSphere isProcessing={isProcessing} />}
           </div>
         </div>
         

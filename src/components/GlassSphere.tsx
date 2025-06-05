@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
@@ -19,54 +18,11 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
 import * as THREE from 'three';
 import { Vector2 } from 'three';
+import ParticleSystem from './ParticleSystem';
 
 interface GlassSphereProps {
   isProcessing?: boolean;
 }
-
-// Futuristic particle system component
-const ParticleField = ({ count = 1000 }: { count?: number }) => {
-  const mesh = useRef<THREE.Points>(null);
-  const { theme } = useTheme();
-  
-  const particlesPosition = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-    }
-    return positions;
-  }, [count]);
-
-  useFrame(({ clock }) => {
-    if (mesh.current) {
-      mesh.current.rotation.x = clock.getElapsedTime() * 0.05;
-      mesh.current.rotation.y = clock.getElapsedTime() * 0.03;
-    }
-  });
-
-  return (
-    <points ref={mesh}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particlesPosition.length / 3}
-          array={particlesPosition}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.02}
-        color={theme === 'dark' ? '#00ffff' : '#0066cc'}
-        transparent
-        opacity={0.6}
-        sizeAttenuation
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-};
 
 // Advanced holographic sphere with transmission and distortion
 const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
@@ -297,7 +253,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   return (
     <>
       {/* Particle field background */}
-      <ParticleField count={800} />
+      <ParticleSystem count={800} size={0.02} opacity={0.6} speed={0.05} range={20} />
       
       {/* Sparkles around the sphere */}
       <Sparkles
@@ -418,7 +374,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
         <Canvas 
           camera={{ position: [0, 0, 4], fov: 45 }}
           dpr={[1, 2]} 
-          shadows
+          shadows={false}
           gl={{ 
             antialias: true,
             alpha: true,
@@ -428,8 +384,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             logarithmicDepthBuffer: true
           }}
           onCreated={({ gl, scene }) => {
-            gl.shadowMap.enabled = true;
-            gl.shadowMap.type = THREE.PCFSoftShadowMap;
+            gl.shadowMap.enabled = false;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
             gl.toneMappingExposure = 1.2;
             scene.fog = new THREE.FogExp2(theme === 'dark' ? 0x000005 : 0xf8f9fa, 0.02);
@@ -444,11 +399,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             position={[3, 3, 3]} 
             intensity={theme === 'dark' ? 0.4 : 0.6} 
             color="#00ffff"
-            castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            shadow-camera-far={10}
-            shadow-camera-near={0.1}
           />
           
           <pointLight 
@@ -463,10 +413,8 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             penumbra={1}
             intensity={0.3}
             color="#66ccff"
-            castShadow
           />
           
-          {/* Stars background */}
           <Stars 
             radius={50}
             depth={50}
@@ -477,7 +425,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             speed={0.5}
           />
           
-          {/* HDRI environment */}
           <Environment preset="dawn" />
           
           <HolographicSphere isProcessing={isProcessing} />

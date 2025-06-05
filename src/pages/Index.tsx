@@ -7,6 +7,8 @@ import { useMood } from '../contexts/MoodContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Logo from '../components/Logo';
 import { ArrowRight } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import ParticleSystem from '../components/ParticleSystem';
 
 const Index = () => {
   const { moodColor } = useMood();
@@ -17,8 +19,19 @@ const Index = () => {
       <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-64px)] text-center px-6 py-12 relative overflow-hidden 
         ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-800'}`}>
         
+        {/* Minimal Particle Background */}
+        <div className="absolute inset-0 z-0">
+          <Canvas 
+            camera={{ position: [0, 0, 10], fov: 60 }}
+            gl={{ alpha: true, antialias: false }}
+            style={{ pointerEvents: 'none' }}
+          >
+            <ParticleSystem count={200} size={0.01} opacity={0.3} speed={0.02} range={30} />
+          </Canvas>
+        </div>
+        
         {/* Starry background effect with CSS */}
-        <div className="absolute inset-0 overflow-hidden z-0" 
+        <div className="absolute inset-0 overflow-hidden z-1" 
           style={{
             backgroundImage: `radial-gradient(${theme === 'dark' ? '#ffffff' : '#333333'} 1px, transparent 1px)`,
             backgroundSize: '50px 50px',
