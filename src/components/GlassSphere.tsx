@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
@@ -24,7 +23,7 @@ interface GlassSphereProps {
   isProcessing?: boolean;
 }
 
-// Futuristic particle system component
+// Particle system component with theme-aware colors
 const ParticleField = ({ count = 1000 }: { count?: number }) => {
   const mesh = useRef<THREE.Points>(null);
   const { theme } = useTheme();
@@ -58,7 +57,7 @@ const ParticleField = ({ count = 1000 }: { count?: number }) => {
       </bufferGeometry>
       <pointsMaterial
         size={0.02}
-        color={theme === 'dark' ? '#00ffff' : '#0066cc'}
+        color={theme === 'dark' ? '#e6f3ff' : '#1a1a1a'}
         transparent
         opacity={0.6}
         sizeAttenuation
@@ -68,7 +67,7 @@ const ParticleField = ({ count = 1000 }: { count?: number }) => {
   );
 };
 
-// Advanced holographic sphere with transmission and distortion
+// Sphere with pure black core and whitish blue edge gradient
 const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -77,15 +76,15 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Advanced shader uniforms for holographic effect
+  // Shader uniforms for the new color scheme
   const uniforms = useMemo(() => ({
     time: { value: 0 },
     isDark: { value: theme === 'dark' },
     glowColor: { value: new THREE.Color(moodColor) },
-    rimColor: { value: new THREE.Color('#00ffff') },
-    baseColor: { value: new THREE.Color(theme === 'dark' ? '#000510' : '#f0f8ff') },
-    centerColor: { value: new THREE.Color('#000000') },
-    edgeColor: { value: new THREE.Color('#404040') },
+    rimColor: { value: new THREE.Color(theme === 'dark' ? '#e6f3ff' : '#2a3a4a') },
+    baseColor: { value: new THREE.Color(theme === 'dark' ? '#000000' : '#ffffff') },
+    centerColor: { value: new THREE.Color(theme === 'dark' ? '#000000' : '#ffffff') },
+    edgeColor: { value: new THREE.Color(theme === 'dark' ? '#e6f3ff' : '#2a3a4a') },
     opacity: { value: theme === 'dark' ? 0.25 : 0.9 },
     rimPower: { value: 1.5 },
     glowIntensity: { value: isProcessing ? 1.2 : 0.6 },
@@ -95,7 +94,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     distortionStrength: { value: 0.1 }
   }), [theme, isProcessing, isHovered, moodColor]);
   
-  // Enhanced vertex shader with holographic distortion
+  // Vertex shader with distortion
   const vertexShader = `
     varying vec3 vNormal;
     varying vec3 vViewPosition;
@@ -107,7 +106,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     uniform float time;
     uniform float distortionStrength;
     
-    // Noise function for distortion
     vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -160,7 +158,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       vUv = uv;
       vPosition = position;
       
-      // Add holographic distortion
       float noise = snoise(position * 3.0 + time * 0.5) * distortionStrength;
       vec3 distortedPosition = position + normal * noise;
       vDistortion = noise;
@@ -173,7 +170,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Advanced fragment shader with holographic effects
+  // Fragment shader with new color scheme
   const fragmentShader = `
     uniform float time;
     uniform bool isDark;
@@ -200,62 +197,61 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       vec3 normal = normalize(vNormal);
       vec3 viewDir = normalize(vViewPosition);
       
-      // Enhanced fresnel with holographic edge enhancement
       float fresnel = 1.0 - abs(dot(normal, viewDir));
       fresnel = pow(fresnel, rimPower);
       
-      // Holographic scanlines
+      // Scanlines effect
       float scanlines = sin(vUv.y * 100.0 + time * scanlineSpeed) * 0.04;
       float scanlineAlpha = sin(vUv.y * 50.0 + time * scanlineSpeed * 1.5) * 0.03;
       
-      // Distance-based gradient (center to edge)
+      // Distance from center for gradient
       float distanceFromCenter = length(vPosition);
       float normalizedDistance = distanceFromCenter;
       
-      // Advanced gradient with holographic interference
+      // New gradient: pure black/white core to whitish blue/blackish blue edge
       vec3 gradientColor;
       if (isDark) {
-        // Dark mode: pure black center to cyan-tinted edge
-        vec3 darkCenter = vec3(0.0, 0.0, 0.05);
-        vec3 darkEdge = vec3(0.0, 0.3, 0.4);
+        // Dark mode: pure black center to whitish blue edge
+        vec3 darkCenter = vec3(0.0, 0.0, 0.0); // Pure black
+        vec3 darkEdge = vec3(0.9, 0.95, 1.0); // Whitish blue
         gradientColor = mix(darkCenter, darkEdge, normalizedDistance);
       } else {
-        // Light mode: bright center to blue edge with better contrast
-        vec3 lightCenter = vec3(0.85, 0.92, 1.0);
-        vec3 lightEdge = vec3(0.2, 0.5, 0.8);
+        // Light mode: white center to blackish blue edge
+        vec3 lightCenter = vec3(1.0, 1.0, 1.0); // Pure white
+        vec3 lightEdge = vec3(0.16, 0.23, 0.29); // Blackish blue
         gradientColor = mix(lightCenter, lightEdge, normalizedDistance);
       }
       
-      // Add holographic color shifting
+      // Subtle holographic shifting (minimal)
       vec3 hologramShift = vec3(
-        sin(time * 2.0 + vUv.x * 10.0) * 0.1,
-        cos(time * 1.5 + vUv.y * 8.0) * 0.1,
-        sin(time * 2.5 + normalizedDistance * 5.0) * 0.15
+        sin(time * 2.0 + vUv.x * 10.0) * 0.05,
+        cos(time * 1.5 + vUv.y * 8.0) * 0.05,
+        sin(time * 2.5 + normalizedDistance * 5.0) * 0.05
       );
       
-      gradientColor += hologramShift * hologramStrength;
+      gradientColor += hologramShift * hologramStrength * 0.5;
       
-      // Enhanced rim lighting with color cycling
-      vec3 rimLightColor = mix(rimColor, glowColor, sin(time * 1.5) * 0.5 + 0.5);
-      vec3 rimLight = rimLightColor * fresnel * (glowIntensity + isHovered * 0.4);
+      // Rim lighting with minimal color
+      vec3 rimLightColor = rimColor;
+      vec3 rimLight = rimLightColor * fresnel * (glowIntensity + isHovered * 0.4) * 0.3;
       
-      // Pulsing core energy
-      float coreEnergy = (1.0 - normalizedDistance) * 0.3;
+      // Core energy (minimal)
+      float coreEnergy = (1.0 - normalizedDistance) * 0.1;
       coreEnergy *= (sin(time * 4.0) * 0.3 + 0.7);
       
-      // Data stream effect
-      float dataStream = sin(vUv.y * 20.0 + time * 8.0) * 0.02;
+      // Data stream effect (subtle)
+      float dataStream = sin(vUv.y * 20.0 + time * 8.0) * 0.01;
       dataStream *= smoothstep(0.8, 1.0, fresnel);
       
       // Final color composition
       vec3 finalColor = gradientColor;
       finalColor += rimLight;
-      finalColor += vec3(coreEnergy * 0.2, coreEnergy * 0.8, coreEnergy);
-      finalColor += vec3(dataStream * 0.0, dataStream * 1.0, dataStream * 0.8);
-      finalColor += scanlines * vec3(0.0, 0.8, 1.0);
-      finalColor += vDistortion * vec3(0.1, 0.3, 0.5);
+      finalColor += vec3(coreEnergy);
+      finalColor += vec3(dataStream);
+      finalColor += scanlines * vec3(0.1, 0.15, 0.2);
+      finalColor += vDistortion * vec3(0.05, 0.1, 0.15);
       
-      // Enhanced opacity with holographic flicker
+      // Final opacity
       float flicker = sin(time * 15.0) * 0.02 + 0.98;
       float finalOpacity = opacity + fresnel * 0.8 + isHovered * 0.3 + scanlineAlpha;
       finalOpacity *= flicker;
@@ -270,21 +266,17 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     
     const time = clock.getElapsedTime();
     
-    // Complex rotation with multiple axes
     groupRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
     groupRef.current.rotation.y = time * 0.08 + Math.cos(time * 0.15) * 0.05;
     groupRef.current.rotation.z = Math.sin(time * 0.25) * 0.08;
     
-    // Floating motion
     groupRef.current.position.y = Math.sin(time * 0.8) * 0.1;
     
-    // Inner sphere counter-rotation
     if (innerSphereRef.current) {
       innerSphereRef.current.rotation.x = -time * 0.3;
       innerSphereRef.current.rotation.y = time * 0.4;
     }
     
-    // Update shader uniforms
     uniforms.time.value = time;
     uniforms.isDark.value = theme === 'dark';
     uniforms.glowIntensity.value = isProcessing 
@@ -296,26 +288,22 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
 
   return (
     <>
-      {/* Particle field background */}
       <ParticleField count={800} />
       
-      {/* Sparkles around the sphere */}
       <Sparkles
         count={100}
         scale={[4, 4, 4]}
         size={2}
         speed={0.4}
-        color={theme === 'dark' ? '#00ffff' : '#0066cc'}
+        color={theme === 'dark' ? '#e6f3ff' : '#1a1a1a'}
       />
       
-      {/* Main sphere group */}
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
         <group 
           ref={groupRef}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
         >
-          {/* Main holographic sphere */}
           <mesh ref={sphereRef} castShadow>
             <sphereGeometry args={[1, 128, 128]} />
             <shaderMaterial 
@@ -328,23 +316,21 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             />
           </mesh>
           
-          {/* Inner energy core */}
           <mesh ref={innerSphereRef} scale={[0.3, 0.3, 0.3]}>
             <sphereGeometry args={[1, 32, 32]} />
             <meshBasicMaterial
-              color={moodColor}
+              color={theme === 'dark' ? '#000000' : '#ffffff'}
               transparent={true}
               opacity={0.4}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
           
-          {/* Outer energy rings */}
           {[1.1, 1.2, 1.3].map((scale, index) => (
             <mesh key={index} scale={[scale, scale, scale]}>
               <ringGeometry args={[0.98, 1.02, 64]} />
               <meshBasicMaterial
-                color={theme === 'dark' ? '#00ffff' : '#0066cc'}
+                color={theme === 'dark' ? '#e6f3ff' : '#2a3a4a'}
                 transparent={true}
                 opacity={0.1 - index * 0.02}
                 side={THREE.DoubleSide}
@@ -353,7 +339,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             </mesh>
           ))}
           
-          {/* Transmission material sphere for refractions */}
           <mesh scale={[1.05, 1.05, 1.05]}>
             <sphereGeometry args={[1, 64, 64]} />
             <MeshTransmissionMaterial
@@ -361,7 +346,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
               thickness={0.2}
               roughness={0.1}
               envMapIntensity={1}
-              color={moodColor}
+              color={theme === 'dark' ? '#000000' : '#ffffff'}
               transparent={true}
               opacity={0.15}
               distortionScale={0}
@@ -371,7 +356,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
         </group>
       </Float>
       
-      {/* Contact shadows for grounding */}
       <ContactShadows
         position={[0, -2, 0]}
         opacity={0.3}
@@ -435,7 +419,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             scene.fog = new THREE.FogExp2(theme === 'dark' ? 0x000005 : 0xf8f9fa, 0.02);
           }}
         >
-          {/* Advanced lighting setup */}
           <color attach="background" args={[theme === 'dark' ? '#000005' : '#f8f9fa']} />
           
           <ambientLight intensity={theme === 'dark' ? 0.05 : 0.2} color="#ffffff" />
@@ -443,7 +426,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           <pointLight 
             position={[3, 3, 3]} 
             intensity={theme === 'dark' ? 0.4 : 0.6} 
-            color="#00ffff"
+            color={theme === 'dark' ? '#e6f3ff' : '#2a3a4a'}
             castShadow
             shadow-mapSize-width={2048}
             shadow-mapSize-height={2048}
@@ -454,7 +437,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           <pointLight 
             position={[-3, -3, 2]} 
             intensity={0.2} 
-            color="#ff3366"
+            color={theme === 'dark' ? '#4a4a4a' : '#cccccc'}
           />
           
           <spotLight
@@ -462,11 +445,10 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             angle={0.3}
             penumbra={1}
             intensity={0.3}
-            color="#66ccff"
+            color={theme === 'dark' ? '#e6f3ff' : '#2a3a4a'}
             castShadow
           />
           
-          {/* Stars background */}
           <Stars 
             radius={50}
             depth={50}
@@ -477,7 +459,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             speed={0.5}
           />
           
-          {/* HDRI environment */}
           <Environment preset="dawn" />
           
           <HolographicSphere isProcessing={isProcessing} />
@@ -493,7 +474,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
         </Canvas>
       </ThreeErrorBoundary>
       
-      {/* Futuristic overlay UI */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-4 left-4 text-xs font-mono opacity-60">
           NEURAL_INTERFACE_v2.1
