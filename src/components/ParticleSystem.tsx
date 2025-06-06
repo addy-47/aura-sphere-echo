@@ -10,6 +10,7 @@ interface ParticleSystemProps {
   opacity?: number;
   speed?: number;
   range?: number;
+  excludeSphere?: boolean; // New prop to exclude particles from sphere area
 }
 
 const ParticleSystem: React.FC<ParticleSystemProps> = ({ 
@@ -17,7 +18,8 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
   size = 0.02, 
   opacity = 0.6,
   speed = 0.05,
-  range = 20
+  range = 20,
+  excludeSphere = true
 }) => {
   const mesh = useRef<THREE.Points>(null);
   const { theme } = useTheme();
@@ -25,12 +27,22 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
   const particlesPosition = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * range;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * range;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * range;
+      let x, y, z, distance;
+      
+      // If excludeSphere is true, ensure particles don't appear inside sphere
+      do {
+        x = (Math.random() - 0.5) * range;
+        y = (Math.random() - 0.5) * range;
+        z = (Math.random() - 0.5) * range;
+        distance = Math.sqrt(x * x + y * y + z * z);
+      } while (excludeSphere && distance < 1.5); // Keep particles outside sphere radius
+      
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
     }
     return positions;
-  }, [count, range]);
+  }, [count, range, excludeSphere]);
 
   useFrame(({ clock }) => {
     if (mesh.current) {
@@ -51,7 +63,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       </bufferGeometry>
       <pointsMaterial
         size={size}
-        color={theme === 'dark' ? '#00ffff' : '#333333'}
+        color={theme === 'dark' ? '#ffffff' : '#333333'}
         transparent
         opacity={opacity}
         sizeAttenuation
