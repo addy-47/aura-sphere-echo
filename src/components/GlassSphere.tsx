@@ -32,7 +32,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Advanced shader uniforms for holographic effect - adjusted for visibility
+  // Advanced shader uniforms for holographic effect - consistent appearance regardless of theme
   const uniforms = useMemo(() => ({
     time: { value: 0 },
     glowColor: { value: new THREE.Color('#ffffff') }, // White primary glow
@@ -41,14 +41,14 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     baseColor: { value: new THREE.Color('#000000') }, // Pure black center
     centerColor: { value: new THREE.Color('#000000') },
     edgeColor: { value: new THREE.Color('#ffffff') }, // White edge
-    opacity: { value: theme === 'dark' ? 0.4 : 0.6 }, // Higher opacity in light mode for visibility
+    opacity: { value: 0.8 }, // Fixed opacity for both modes
     rimPower: { value: 1.2 },
     glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
     isHovered: { value: isHovered ? 1.0 : 0.0 },
     hologramStrength: { value: 0.2 },
     scanlineSpeed: { value: 1.5 },
     distortionStrength: { value: 0.05 }
-  }), [theme, isProcessing, isHovered]);
+  }), [isProcessing, isHovered]);
   
   // Enhanced vertex shader with holographic distortion
   const vertexShader = `
@@ -128,7 +128,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Fragment shader with better visibility in light mode
+  // Fragment shader - strong visibility in both light and dark modes
   const fragmentShader = `
     uniform float time;
     uniform vec3 glowColor;
@@ -163,23 +163,23 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       float distanceFromCenter = length(vPosition);
       float normalizedDistance = distanceFromCenter;
       
-      // Dark center with bright holographic edges
-      vec3 gradientColor = mix(vec3(0.1, 0.1, 0.2), edgeColor * 0.3, normalizedDistance);
+      // Dark blue center with bright white/blue edges for visibility
+      vec3 gradientColor = mix(vec3(0.0, 0.1, 0.3), edgeColor * 0.5, normalizedDistance);
       
-      // Subtle scanlines for holographic effect
-      float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.02;
+      // Strong scanlines for holographic effect
+      float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.05;
       
       // Bright rim lighting with blue accent
-      vec3 rimLight = mix(rimColor * 0.8, blueGlow, 0.3) * fresnel * glowIntensity;
+      vec3 rimLight = mix(rimColor * 1.2, blueGlow * 1.5, 0.3) * fresnel * glowIntensity;
       
-      // Enhanced blue glow for visibility
-      vec3 blueGlowEffect = blueGlow * fresnel * 0.2 * glowIntensity;
+      // Strong blue glow for visibility in both themes
+      vec3 blueGlowEffect = blueGlow * fresnel * 0.4 * glowIntensity;
       
-      // Final color composition - enhanced for light mode visibility
-      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(0.5, 0.8, 1.0);
+      // Final color composition - strong visibility in both modes
+      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(0.3, 0.6, 1.0);
       
-      // Enhanced opacity and edge definition for light mode
-      float finalOpacity = fresnel * opacity * (0.7 + glowIntensity * 0.3);
+      // Strong opacity for visibility in both modes
+      float finalOpacity = fresnel * opacity * (0.8 + glowIntensity * 0.2);
       
       gl_FragColor = vec4(finalColor, finalOpacity);
     }
