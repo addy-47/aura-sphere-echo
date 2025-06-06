@@ -295,13 +295,18 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
     }
   }, []);
 
+  // Helper function to get responsive FOV
+  const getResponsiveFOV = () => {
+    return window.innerWidth < 768 ? 60 : 45;
+  };
+
   return (
     <div className="w-full h-full min-h-[200px] sm:min-h-[300px] md:min-h-[400px] relative overflow-hidden">
       <ThreeErrorBoundary>
         <Canvas 
           camera={{ 
             position: [0, 0, 3], 
-            fov: window.innerWidth < 768 ? 60 : 45 
+            fov: getResponsiveFOV()
           }}
           dpr={[1, Math.min(window.devicePixelRatio, 2)]} 
           shadows={false}
@@ -321,8 +326,10 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             
             // Responsive camera adjustment
             const handleResize = () => {
-              camera.fov = window.innerWidth < 768 ? 60 : 45;
-              camera.updateProjectionMatrix();
+              if (camera instanceof THREE.PerspectiveCamera) {
+                camera.fov = getResponsiveFOV();
+                camera.updateProjectionMatrix();
+              }
             };
             window.addEventListener('resize', handleResize);
           }}
