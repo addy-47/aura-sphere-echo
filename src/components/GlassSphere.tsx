@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
@@ -33,10 +32,9 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Advanced shader uniforms for holographic effect
+  // Advanced shader uniforms for holographic effect - consistent appearance
   const uniforms = useMemo(() => ({
     time: { value: 0 },
-    isDark: { value: theme === 'dark' },
     glowColor: { value: new THREE.Color('#ffffff') }, // White primary glow
     blueGlow: { value: new THREE.Color('#4a9eff') }, // Subtle blue glow
     rimColor: { value: new THREE.Color('#ffffff') }, // White rim
@@ -50,7 +48,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     hologramStrength: { value: 0.2 },
     scanlineSpeed: { value: 1.5 },
     distortionStrength: { value: 0.05 }
-  }), [theme, isProcessing, isHovered]);
+  }), [isProcessing, isHovered]);
   
   // Enhanced vertex shader with holographic distortion
   const vertexShader = `
@@ -130,10 +128,9 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Enhanced fragment shader with subtle blue glow
+  // Fragment shader - consistent appearance regardless of theme
   const fragmentShader = `
     uniform float time;
-    uniform bool isDark;
     uniform vec3 glowColor;
     uniform vec3 blueGlow;
     uniform vec3 rimColor;
@@ -202,7 +199,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     
     // Update shader uniforms
     uniforms.time.value = time;
-    uniforms.isDark.value = theme === 'dark';
     uniforms.glowIntensity.value = isProcessing 
       ? 0.8 + Math.sin(time * 3) * 0.2 
       : 0.5;
@@ -212,7 +208,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   return (
     <>
       {/* Enhanced particle field background */}
-      <ParticleSystem count={800} size={0.02} opacity={0.6} speed={0.03} range={25} excludeSphere={true} />
+      <ParticleSystem count={1200} size={0.02} opacity={0.6} speed={0.03} range={25} excludeSphere={true} />
       
       {/* Reduced sparkles around the sphere */}
       <Sparkles
@@ -301,7 +297,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
     }
   }, []);
 
-  // Helper function to get responsive FOV
   const getResponsiveFOV = () => {
     return window.innerWidth < 768 ? 60 : 45;
   };
@@ -330,7 +325,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             gl.toneMappingExposure = 1.0;
             scene.fog = new THREE.FogExp2(theme === 'dark' ? 0x000000 : 0xffffff, 0.01);
             
-            // Responsive camera adjustment
             const handleResize = () => {
               if (camera instanceof THREE.PerspectiveCamera) {
                 camera.fov = getResponsiveFOV();
@@ -340,7 +334,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             window.addEventListener('resize', handleResize);
           }}
         >
-          {/* Background color - consistent for both modes */}
+          {/* Background color - white in light mode, black in dark mode */}
           <color attach="background" args={[theme === 'dark' ? '#000000' : '#ffffff']} />
           
           <ambientLight intensity={0.1} color="#ffffff" />
