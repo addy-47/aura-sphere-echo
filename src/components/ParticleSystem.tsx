@@ -10,7 +10,7 @@ interface ParticleSystemProps {
   opacity?: number;
   speed?: number;
   range?: number;
-  excludeSphere?: boolean; // New prop to exclude particles from sphere area
+  excludeSphere?: boolean;
 }
 
 const ParticleSystem: React.FC<ParticleSystemProps> = ({ 
@@ -35,7 +35,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
         y = (Math.random() - 0.5) * range;
         z = (Math.random() - 0.5) * range;
         distance = Math.sqrt(x * x + y * y + z * z);
-      } while (excludeSphere && distance < 1.5); // Keep particles outside sphere radius
+      } while (excludeSphere && distance < 2.0); // Increased exclusion radius for smaller sphere
       
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
@@ -63,7 +63,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       </bufferGeometry>
       <pointsMaterial
         size={size}
-        color={theme === 'dark' ? '#ffffff' : '#333333'}
+        color={theme === 'dark' ? '#ffffff' : '#666666'}
         transparent
         opacity={opacity}
         sizeAttenuation

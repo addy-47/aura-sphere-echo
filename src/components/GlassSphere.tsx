@@ -37,12 +37,13 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const uniforms = useMemo(() => ({
     time: { value: 0 },
     isDark: { value: theme === 'dark' },
-    glowColor: { value: new THREE.Color('#ffffff') }, // Changed to white
-    rimColor: { value: new THREE.Color('#ffffff') }, // Changed to white
+    glowColor: { value: new THREE.Color('#ffffff') }, // White primary glow
+    blueGlow: { value: new THREE.Color('#4a9eff') }, // Subtle blue glow
+    rimColor: { value: new THREE.Color('#ffffff') }, // White rim
     baseColor: { value: new THREE.Color('#000000') }, // Pure black center
     centerColor: { value: new THREE.Color('#000000') },
     edgeColor: { value: new THREE.Color('#ffffff') }, // White edge
-    opacity: { value: theme === 'dark' ? 0.3 : 0.4 },
+    opacity: { value: 0.4 }, // Same opacity for both modes
     rimPower: { value: 1.2 },
     glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
     isHovered: { value: isHovered ? 1.0 : 0.0 },
@@ -129,11 +130,12 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Simplified fragment shader with pure black center and white glow
+  // Enhanced fragment shader with subtle blue glow
   const fragmentShader = `
     uniform float time;
     uniform bool isDark;
     uniform vec3 glowColor;
+    uniform vec3 blueGlow;
     uniform vec3 rimColor;
     uniform vec3 baseColor;
     uniform vec3 centerColor;
@@ -170,11 +172,14 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       // Subtle scanlines for holographic effect
       float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.02;
       
-      // White rim lighting
-      vec3 rimLight = rimColor * fresnel * glowIntensity;
+      // White rim lighting with subtle blue tint
+      vec3 rimLight = mix(rimColor, blueGlow, 0.15) * fresnel * glowIntensity;
       
-      // Final color composition - mostly transparent with white rim
-      vec3 finalColor = gradientColor + rimLight + scanlines * vec3(1.0, 1.0, 1.0);
+      // Add subtle blue glow around the sphere
+      vec3 blueGlowEffect = blueGlow * fresnel * 0.1 * glowIntensity;
+      
+      // Final color composition - consistent for both light and dark modes
+      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(1.0, 1.0, 1.0);
       
       // Enhance opacity at edges, transparent in center
       float finalOpacity = fresnel * opacity * (0.5 + glowIntensity * 0.5);
@@ -206,24 +211,25 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
 
   return (
     <>
-      {/* Particle field background - only outside sphere */}
-      <ParticleSystem count={600} size={0.015} opacity={0.4} speed={0.03} range={25} />
+      {/* Enhanced particle field background */}
+      <ParticleSystem count={800} size={0.02} opacity={0.6} speed={0.03} range={25} excludeSphere={true} />
       
-      {/* Minimal sparkles around the sphere */}
+      {/* Reduced sparkles around the sphere */}
       <Sparkles
-        count={50}
-        scale={[6, 6, 6]}
-        size={1.5}
+        count={30}
+        scale={[4, 4, 4]}
+        size={1.2}
         speed={0.3}
-        color="#ffffff"
+        color="#4a9eff"
       />
       
-      {/* Main sphere group */}
+      {/* Main sphere group - reduced size */}
       <Float speed={1.0} rotationIntensity={0.1} floatIntensity={0.2}>
         <group 
           ref={groupRef}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
+          scale={[0.7, 0.7, 0.7]} // Reduced size
         >
           {/* Main holographic sphere */}
           <mesh ref={sphereRef} castShadow>
@@ -238,14 +244,14 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             />
           </mesh>
           
-          {/* Outer energy rings - subtle white */}
+          {/* Outer energy rings - subtle blue tint */}
           {[1.05, 1.1].map((scale, index) => (
             <mesh key={index} scale={[scale, scale, scale]}>
               <ringGeometry args={[0.98, 1.02, 64]} />
               <meshBasicMaterial
-                color="#ffffff"
+                color="#4a9eff"
                 transparent={true}
-                opacity={0.05 - index * 0.02}
+                opacity={0.03 - index * 0.01}
                 side={THREE.DoubleSide}
                 blending={THREE.AdditiveBlending}
               />
@@ -258,7 +264,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       <ContactShadows
         position={[0, -2, 0]}
         opacity={0.2}
-        scale={6}
+        scale={4}
         blur={1.5}
         far={2}
       />
@@ -334,7 +340,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             window.addEventListener('resize', handleResize);
           }}
         >
-          {/* Minimal lighting setup */}
+          {/* Background color - consistent for both modes */}
           <color attach="background" args={[theme === 'dark' ? '#000000' : '#ffffff']} />
           
           <ambientLight intensity={0.1} color="#ffffff" />
@@ -348,7 +354,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           <pointLight 
             position={[-2, -2, 1]} 
             intensity={0.1} 
-            color="#ffffff"
+            color="#4a9eff"
           />
           
           <Stars 
@@ -384,7 +390,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
         <div className="absolute bottom-2 right-2 text-xs font-mono opacity-40">
           {isProcessing ? 'PROCESSING...' : 'READY'}
         </div>
-        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white opacity-60 animate-pulse"></div>
+        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-blue-400 opacity-60 animate-pulse"></div>
       </div>
     </div>
   );
