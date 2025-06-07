@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { 
@@ -40,14 +39,15 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     baseColor: { value: new THREE.Color('#000000') },
     centerColor: { value: new THREE.Color('#000000') },
     edgeColor: { value: new THREE.Color('#ffffff') },
-    opacity: { value: 0.8 }, // Increased opacity for better visibility
+    opacity: { value: 0.8 },
     rimPower: { value: 1.2 },
     glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
     isHovered: { value: isHovered ? 1.0 : 0.0 },
     hologramStrength: { value: 0.2 },
     scanlineSpeed: { value: 1.5 },
-    distortionStrength: { value: 0.05 }
-  }), [isProcessing, isHovered]);
+    distortionStrength: { value: 0.05 },
+    isLightMode: { value: theme === 'light' ? 1.0 : 0.0 }
+  }), [isProcessing, isHovered, theme]);
   
   const vertexShader = `
     varying vec3 vNormal;
@@ -124,7 +124,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Fixed fragment shader - same colors regardless of theme
+  // Updated fragment shader with theme detection
   const fragmentShader = `
     uniform float time;
     uniform vec3 glowColor;
@@ -139,6 +139,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     uniform float isHovered;
     uniform float hologramStrength;
     uniform float scanlineSpeed;
+    uniform float isLightMode;
     
     varying vec3 vNormal;
     varying vec3 vViewPosition;
@@ -159,23 +160,30 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       float distanceFromCenter = length(vPosition);
       float normalizedDistance = distanceFromCenter;
       
-      // Pure black center merging to bright edge
-      vec3 gradientColor = mix(vec3(0.0, 0.0, 0.0), vec3(0.2, 0.25, 0.3), normalizedDistance);
+      // Adaptive colors based on theme
+      vec3 centerCol = mix(vec3(0.0, 0.0, 0.0), vec3(0.1, 0.1, 0.2), isLightMode);
+      vec3 edgeCol = mix(vec3(0.2, 0.25, 0.3), vec3(0.4, 0.5, 0.7), isLightMode);
+      
+      // Gradient from center to edge
+      vec3 gradientColor = mix(centerCol, edgeCol, normalizedDistance);
       
       // Subtle scanlines for holographic effect
       float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.03;
       
-      // Bright white rim lighting with subtle blue tint - consistent appearance
-      vec3 rimLight = mix(vec3(1.0), vec3(0.3, 0.6, 1.0), 0.2) * fresnel * glowIntensity * 2.0;
+      // Enhanced rim lighting - brighter in light mode for visibility
+      float rimIntensity = mix(2.0, 4.0, isLightMode);
+      vec3 rimLight = mix(vec3(1.0), vec3(0.3, 0.6, 1.0), 0.2) * fresnel * glowIntensity * rimIntensity;
       
-      // Enhanced blue glow effect for better visibility
-      vec3 blueGlowEffect = vec3(0.3, 0.6, 1.0) * fresnel * 0.3 * glowIntensity;
+      // Blue glow effect - enhanced for light mode
+      float blueGlowIntensity = mix(0.3, 0.6, isLightMode);
+      vec3 blueGlowEffect = vec3(0.3, 0.6, 1.0) * fresnel * blueGlowIntensity * glowIntensity;
       
-      // Final color composition - FIXED colors regardless of theme
+      // Final color composition
       vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(1.0);
       
-      // Enhanced opacity for better visibility in both modes
-      float finalOpacity = (fresnel * opacity * (0.7 + glowIntensity * 0.3)) + 0.2;
+      // Enhanced opacity for better visibility in light mode
+      float baseOpacity = mix(0.7, 0.9, isLightMode);
+      float finalOpacity = (fresnel * opacity * (baseOpacity + glowIntensity * 0.3)) + mix(0.2, 0.4, isLightMode);
       
       gl_FragColor = vec4(finalColor, finalOpacity);
     }
@@ -194,6 +202,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       ? 0.8 + Math.sin(time * 3) * 0.2 
       : 0.5;
     uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
+    uniforms.isLightMode.value = theme === 'light' ? 1.0 : 0.0;
   });
 
   return (

@@ -8,6 +8,7 @@ import * as THREE from 'three';
 
 interface LoaderComponentProps {
   isLoading: boolean;
+  onLoadingComplete?: () => void;
 }
 
 const AnimatedLoadingOrb: React.FC = () => {
@@ -25,13 +26,13 @@ const AnimatedLoadingOrb: React.FC = () => {
     orbRef.current.rotation.y = time * 0.5;
     orbRef.current.rotation.x = Math.sin(time * 0.3) * 0.2;
     
-    // Pulse animation
-    const pulse = 1 + Math.sin(time * 2) * 0.1;
+    // Enhanced pulse animation
+    const pulse = 1 + Math.sin(time * 3) * 0.15;
     orbRef.current.scale.set(pulse, pulse, pulse);
     
-    // Inner orb counter-rotation
-    innerOrbRef.current.rotation.x = -time * 0.3;
-    innerOrbRef.current.rotation.z = time * 0.2;
+    // Inner orb counter-rotation with faster speed
+    innerOrbRef.current.rotation.x = -time * 0.8;
+    innerOrbRef.current.rotation.z = time * 0.6;
   });
   
   return (
@@ -71,13 +72,20 @@ const AnimatedLoadingOrb: React.FC = () => {
   );
 };
 
-const LoaderComponent: React.FC<LoaderComponentProps> = ({ isLoading }) => {
+const LoaderComponent: React.FC<LoaderComponentProps> = ({ isLoading, onLoadingComplete }) => {
   const { theme } = useTheme();
+
+  React.useEffect(() => {
+    if (!isLoading && onLoadingComplete) {
+      const timer = setTimeout(onLoadingComplete, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, onLoadingComplete]);
 
   if (!isLoading) return null;
 
   return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center">
+    <div className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-500 ${isLoading ? 'opacity-100' : 'opacity-0'}`}>
       <div 
         className="w-full h-full rounded-xl transition-all duration-500"
         style={{ 
