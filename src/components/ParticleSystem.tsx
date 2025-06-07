@@ -63,7 +63,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       </bufferGeometry>
       <pointsMaterial
         size={size}
-        color={theme === 'dark' ? '#ffffff' : '#000000'} // White particles in dark mode, black in light mode
+        color={theme === 'dark' ? '#ffffff' : '#666666'}
         transparent
         opacity={opacity}
         sizeAttenuation
