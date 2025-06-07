@@ -33,157 +33,69 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   
   const uniforms = useMemo(() => ({
     time: { value: 0 },
-    glowColor: { value: new THREE.Color('#ffffff') },
-    blueGlow: { value: new THREE.Color('#4a9eff') },
-    rimColor: { value: new THREE.Color('#ffffff') },
-    baseColor: { value: new THREE.Color('#000000') },
-    centerColor: { value: new THREE.Color('#000000') },
-    edgeColor: { value: new THREE.Color('#ffffff') },
-    opacity: { value: 0.8 },
-    rimPower: { value: 1.2 },
-    glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
-    isHovered: { value: isHovered ? 1.0 : 0.0 },
-    hologramStrength: { value: 0.2 },
-    scanlineSpeed: { value: 1.5 },
-    distortionStrength: { value: 0.05 },
+    rimPower: { value: 2.0 },
+    opacity: { value: 0.15 },
+    rimOpacity: { value: 0.4 },
+    isProcessing: { value: isProcessing ? 1.0 : 0.0 },
     isLightMode: { value: theme === 'light' ? 1.0 : 0.0 }
-  }), [isProcessing, isHovered, theme]);
+  }), [isProcessing, theme]);
   
   const vertexShader = `
     varying vec3 vNormal;
     varying vec3 vViewPosition;
     varying vec2 vUv;
-    varying vec3 vWorldPosition;
-    varying vec3 vPosition;
-    varying float vDistortion;
-    
-    uniform float time;
-    uniform float distortionStrength;
-    
-    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-    
-    float snoise(vec3 v) {
-      const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-      const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-      vec3 i = floor(v + dot(v, C.yyy));
-      vec3 x0 = v - i + dot(i, C.xxx);
-      vec3 g = step(x0.yzx, x0.xyz);
-      vec3 l = 1.0 - g;
-      vec3 i1 = min(g.xyz, l.zxy);
-      vec3 i2 = max(g.xyz, l.zxy);
-      vec3 x1 = x0 - i1 + C.xxx;
-      vec3 x2 = x0 - i2 + C.yyy;
-      vec3 x3 = x0 - D.yyy;
-      i = mod289(i);
-      vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-      float n_ = 0.142857142857;
-      vec3 ns = n_ * D.wyz - D.xzx;
-      vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-      vec4 x_ = floor(j * ns.z);
-      vec4 y_ = floor(j - 7.0 * x_);
-      vec4 x = x_ *ns.x + ns.yyyy;
-      vec4 y = y_ *ns.x + ns.yyyy;
-      vec4 h = 1.0 - abs(x) - abs(y);
-      vec4 b0 = vec4(x.xy, y.xy);
-      vec4 b1 = vec4(x.zw, y.zw);
-      vec4 s0 = floor(b0) * 2.0 + 1.0;
-      vec4 s1 = floor(b1) * 2.0 + 1.0;
-      vec4 sh = -step(h, vec4(0.0));
-      vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-      vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-      vec3 p0 = vec3(a0.xy, h.x);
-      vec3 p1 = vec3(a0.zw, h.y);
-      vec3 p2 = vec3(a1.xy, h.z);
-      vec3 p3 = vec3(a1.zw, h.w);
-      vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-      p0 *= norm.x;
-      p1 *= norm.y;
-      p2 *= norm.z;
-      p3 *= norm.w;
-      vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-      m = m * m;
-      return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-    }
     
     void main() {
       vUv = uv;
-      vPosition = position;
-      
-      float noise = snoise(position * 2.0 + time * 0.3) * distortionStrength;
-      vec3 distortedPosition = position + normal * noise;
-      vDistortion = noise;
-      
       vNormal = normalize(normalMatrix * normal);
-      vec4 mvPosition = modelViewMatrix * vec4(distortedPosition, 1.0);
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
       vViewPosition = -mvPosition.xyz;
-      vWorldPosition = (modelMatrix * vec4(distortedPosition, 1.0)).xyz;
       gl_Position = projectionMatrix * mvPosition;
     }
   `;
 
-  // Updated fragment shader with theme detection
   const fragmentShader = `
     uniform float time;
-    uniform vec3 glowColor;
-    uniform vec3 blueGlow;
-    uniform vec3 rimColor;
-    uniform vec3 baseColor;
-    uniform vec3 centerColor;
-    uniform vec3 edgeColor;
-    uniform float opacity;
     uniform float rimPower;
-    uniform float glowIntensity;
-    uniform float isHovered;
-    uniform float hologramStrength;
-    uniform float scanlineSpeed;
+    uniform float opacity;
+    uniform float rimOpacity;
+    uniform float isProcessing;
     uniform float isLightMode;
     
     varying vec3 vNormal;
     varying vec3 vViewPosition;
     varying vec2 vUv;
-    varying vec3 vWorldPosition;
-    varying vec3 vPosition;
-    varying float vDistortion;
     
     void main() {
       vec3 normal = normalize(vNormal);
       vec3 viewDir = normalize(vViewPosition);
       
-      // Enhanced fresnel for rim lighting
+      // Simple fresnel for rim lighting
       float fresnel = 1.0 - abs(dot(normal, viewDir));
       fresnel = pow(fresnel, rimPower);
       
-      // Distance from center for gradient
-      float distanceFromCenter = length(vPosition);
-      float normalizedDistance = distanceFromCenter;
+      // Base sphere color - very subtle
+      vec3 baseColor = mix(
+        vec3(0.05, 0.05, 0.1), // Dark mode: subtle blue tint
+        vec3(0.9, 0.9, 0.95),  // Light mode: very light gray
+        isLightMode
+      );
       
-      // Adaptive colors based on theme
-      vec3 centerCol = mix(vec3(0.0, 0.0, 0.0), vec3(0.1, 0.1, 0.2), isLightMode);
-      vec3 edgeCol = mix(vec3(0.2, 0.25, 0.3), vec3(0.4, 0.5, 0.7), isLightMode);
+      // Rim color - consistent blue for both modes
+      vec3 rimColor = vec3(0.3, 0.6, 1.0);
       
-      // Gradient from center to edge
-      vec3 gradientColor = mix(centerCol, edgeCol, normalizedDistance);
+      // Combine base and rim
+      vec3 finalColor = mix(baseColor, rimColor, fresnel * 0.5);
       
-      // Subtle scanlines for holographic effect
-      float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.03;
+      // Final opacity - very transparent base with subtle rim
+      float baseOpacity = mix(opacity * 0.3, opacity * 0.8, isLightMode);
+      float finalOpacity = baseOpacity + fresnel * rimOpacity;
       
-      // Enhanced rim lighting - brighter in light mode for visibility
-      float rimIntensity = mix(2.0, 4.0, isLightMode);
-      vec3 rimLight = mix(vec3(1.0), vec3(0.3, 0.6, 1.0), 0.2) * fresnel * glowIntensity * rimIntensity;
-      
-      // Blue glow effect - enhanced for light mode
-      float blueGlowIntensity = mix(0.3, 0.6, isLightMode);
-      vec3 blueGlowEffect = vec3(0.3, 0.6, 1.0) * fresnel * blueGlowIntensity * glowIntensity;
-      
-      // Final color composition
-      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(1.0);
-      
-      // Enhanced opacity for better visibility in light mode
-      float baseOpacity = mix(0.7, 0.9, isLightMode);
-      float finalOpacity = (fresnel * opacity * (baseOpacity + glowIntensity * 0.3)) + mix(0.2, 0.4, isLightMode);
+      // Add subtle processing pulse
+      if (isProcessing > 0.5) {
+        float pulse = sin(time * 3.0) * 0.1 + 1.0;
+        finalOpacity *= pulse;
+      }
       
       gl_FragColor = vec4(finalColor, finalOpacity);
     }
@@ -194,78 +106,53 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     
     const time = clock.getElapsedTime();
     
-    groupRef.current.rotation.y = time * 0.05;
-    groupRef.current.position.y = Math.sin(time * 0.6) * 0.05;
+    // Very subtle rotation
+    groupRef.current.rotation.y = time * 0.02;
+    groupRef.current.position.y = Math.sin(time * 0.4) * 0.02;
     
     uniforms.time.value = time;
-    uniforms.glowIntensity.value = isProcessing 
-      ? 0.8 + Math.sin(time * 3) * 0.2 
-      : 0.5;
-    uniforms.isHovered.value = isHovered ? 1.0 : 0.0;
+    uniforms.isProcessing.value = isProcessing ? 1.0 : 0.0;
     uniforms.isLightMode.value = theme === 'light' ? 1.0 : 0.0;
   });
 
   return (
     <>
-      {/* Particles - theme-aware colors */}
+      {/* Reduced particle count for cleaner look */}
       <ParticleSystem 
-        count={800} 
-        size={0.02} 
-        opacity={0.6} 
-        speed={0.03} 
-        range={25} 
+        count={200} 
+        size={0.015} 
+        opacity={0.3} 
+        speed={0.01} 
+        range={15} 
         excludeSphere={true}
       />
       
-      {/* Sparkles - consistent blue color */}
-      <Sparkles
-        count={30}
-        scale={[4, 4, 4]}
-        size={1.2}
-        speed={0.3}
-        color="#4a9eff"
-      />
-      
-      <Float speed={1.0} rotationIntensity={0.1} floatIntensity={0.2}>
+      <Float speed={0.5} rotationIntensity={0.05} floatIntensity={0.1}>
         <group 
           ref={groupRef}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
-          scale={[0.7, 0.7, 0.7]}
+          scale={[1.0, 1.0, 1.0]}
         >
-          <mesh ref={sphereRef} castShadow>
-            <sphereGeometry args={[1, 128, 128]} />
+          <mesh ref={sphereRef}>
+            <sphereGeometry args={[1, 64, 64]} />
             <shaderMaterial 
               vertexShader={vertexShader}
               fragmentShader={fragmentShader}
               uniforms={uniforms}
               transparent={true}
               side={THREE.DoubleSide}
-              blending={THREE.AdditiveBlending}
+              blending={THREE.NormalBlending}
             />
           </mesh>
-          
-          {/* Outer energy rings - consistent blue color */}
-          {[1.05, 1.1].map((scale, index) => (
-            <mesh key={index} scale={[scale, scale, scale]}>
-              <ringGeometry args={[0.98, 1.02, 64]} />
-              <meshBasicMaterial
-                color="#4a9eff"
-                transparent={true}
-                opacity={0.03 - index * 0.01}
-                side={THREE.DoubleSide}
-                blending={THREE.AdditiveBlending}
-              />
-            </mesh>
-          ))}
         </group>
       </Float>
       
       <ContactShadows
         position={[0, -2, 0]}
-        opacity={0.2}
-        scale={4}
-        blur={1.5}
+        opacity={0.1}
+        scale={3}
+        blur={2}
         far={2}
       />
     </>
@@ -325,7 +212,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             gl.shadowMap.enabled = false;
             gl.toneMapping = THREE.ACESFilmicToneMapping;
             gl.toneMappingExposure = 1.0;
-            scene.fog = new THREE.FogExp2(theme === 'dark' ? 0x000000 : 0xffffff, 0.01);
             
             const handleResize = () => {
               if (camera instanceof THREE.PerspectiveCamera) {
@@ -339,28 +225,22 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           {/* Theme-aware background */}
           <color attach="background" args={[theme === 'dark' ? '#000000' : '#ffffff']} />
           
-          <ambientLight intensity={0.1} color="#ffffff" />
+          <ambientLight intensity={0.2} color="#ffffff" />
           
           <pointLight 
             position={[2, 2, 2]} 
-            intensity={0.3} 
-            color="#ffffff"
-          />
-          
-          <pointLight 
-            position={[-2, -2, 1]} 
             intensity={0.1} 
-            color="#4a9eff"
+            color="#ffffff"
           />
           
           <Stars 
             radius={100}
             depth={50}
-            count={1000}
-            factor={2}
+            count={500}
+            factor={1}
             saturation={0}
             fade
-            speed={0.3}
+            speed={0.1}
           />
           
           <Environment preset="night" />
@@ -370,10 +250,10 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
           <OrbitControls 
             enableZoom={false}
             enablePan={false}
-            rotateSpeed={0.1}
+            rotateSpeed={0.05}
             autoRotate={false}
             enableDamping
-            dampingFactor={0.03}
+            dampingFactor={0.05}
           />
         </Canvas>
       </ThreeErrorBoundary>
