@@ -29,13 +29,12 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
     for (let i = 0; i < count; i++) {
       let x, y, z, distance;
       
-      // If excludeSphere is true, ensure particles don't appear inside sphere
       do {
         x = (Math.random() - 0.5) * range;
         y = (Math.random() - 0.5) * range;
         z = (Math.random() - 0.5) * range;
         distance = Math.sqrt(x * x + y * y + z * z);
-      } while (excludeSphere && distance < 2.0); // Increased exclusion radius for smaller sphere
+      } while (excludeSphere && distance < 2.0);
       
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
@@ -63,7 +62,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       </bufferGeometry>
       <pointsMaterial
         size={size}
-        color={theme === 'dark' ? '#ffffff' : '#666666'}
+        color={theme === 'dark' ? '#ffffff' : '#000000'}
         transparent
         opacity={opacity}
         sizeAttenuation

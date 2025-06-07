@@ -25,7 +25,6 @@ interface GlassSphereProps {
   isProcessing?: boolean;
 }
 
-// Advanced holographic sphere with transmission and distortion
 const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -33,26 +32,23 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Advanced shader uniforms for holographic effect
   const uniforms = useMemo(() => ({
     time: { value: 0 },
-    isDark: { value: theme === 'dark' },
-    glowColor: { value: new THREE.Color('#ffffff') }, // White primary glow
-    blueGlow: { value: new THREE.Color('#4a9eff') }, // Subtle blue glow
-    rimColor: { value: new THREE.Color('#ffffff') }, // White rim
-    baseColor: { value: new THREE.Color('#000000') }, // Pure black center
+    glowColor: { value: new THREE.Color('#ffffff') },
+    blueGlow: { value: new THREE.Color('#4a9eff') },
+    rimColor: { value: new THREE.Color('#ffffff') },
+    baseColor: { value: new THREE.Color('#000000') },
     centerColor: { value: new THREE.Color('#000000') },
-    edgeColor: { value: new THREE.Color('#ffffff') }, // White edge
-    opacity: { value: 0.4 }, // Same opacity for both modes
+    edgeColor: { value: new THREE.Color('#ffffff') },
+    opacity: { value: 0.8 }, // Increased opacity for better visibility
     rimPower: { value: 1.2 },
     glowIntensity: { value: isProcessing ? 1.0 : 0.5 },
     isHovered: { value: isHovered ? 1.0 : 0.0 },
     hologramStrength: { value: 0.2 },
     scanlineSpeed: { value: 1.5 },
     distortionStrength: { value: 0.05 }
-  }), [theme, isProcessing, isHovered]);
+  }), [isProcessing, isHovered]);
   
-  // Enhanced vertex shader with holographic distortion
   const vertexShader = `
     varying vec3 vNormal;
     varying vec3 vViewPosition;
@@ -64,7 +60,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     uniform float time;
     uniform float distortionStrength;
     
-    // Noise function for distortion
     vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
     vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -117,7 +112,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       vUv = uv;
       vPosition = position;
       
-      // Add subtle holographic distortion
       float noise = snoise(position * 2.0 + time * 0.3) * distortionStrength;
       vec3 distortedPosition = position + normal * noise;
       vDistortion = noise;
@@ -130,10 +124,9 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     }
   `;
 
-  // Enhanced fragment shader with subtle blue glow
+  // Fixed fragment shader - same colors regardless of theme
   const fragmentShader = `
     uniform float time;
-    uniform bool isDark;
     uniform vec3 glowColor;
     uniform vec3 blueGlow;
     uniform vec3 rimColor;
@@ -166,43 +159,37 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       float distanceFromCenter = length(vPosition);
       float normalizedDistance = distanceFromCenter;
       
-      // Pure black center merging to edge glow
-      vec3 gradientColor = mix(vec3(0.0, 0.0, 0.0), edgeColor * 0.1, normalizedDistance);
+      // Pure black center merging to bright edge
+      vec3 gradientColor = mix(vec3(0.0, 0.0, 0.0), vec3(0.2, 0.25, 0.3), normalizedDistance);
       
       // Subtle scanlines for holographic effect
-      float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.02;
+      float scanlines = sin(vUv.y * 80.0 + time * scanlineSpeed) * 0.03;
       
-      // White rim lighting with subtle blue tint
-      vec3 rimLight = mix(rimColor, blueGlow, 0.15) * fresnel * glowIntensity;
+      // Bright white rim lighting with subtle blue tint - consistent appearance
+      vec3 rimLight = mix(vec3(1.0), vec3(0.3, 0.6, 1.0), 0.2) * fresnel * glowIntensity * 2.0;
       
-      // Add subtle blue glow around the sphere
-      vec3 blueGlowEffect = blueGlow * fresnel * 0.1 * glowIntensity;
+      // Enhanced blue glow effect for better visibility
+      vec3 blueGlowEffect = vec3(0.3, 0.6, 1.0) * fresnel * 0.3 * glowIntensity;
       
-      // Final color composition - consistent for both light and dark modes
-      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(1.0, 1.0, 1.0);
+      // Final color composition - FIXED colors regardless of theme
+      vec3 finalColor = gradientColor + rimLight + blueGlowEffect + scanlines * vec3(1.0);
       
-      // Enhance opacity at edges, transparent in center
-      float finalOpacity = fresnel * opacity * (0.5 + glowIntensity * 0.5);
+      // Enhanced opacity for better visibility in both modes
+      float finalOpacity = (fresnel * opacity * (0.7 + glowIntensity * 0.3)) + 0.2;
       
       gl_FragColor = vec4(finalColor, finalOpacity);
     }
   `;
 
-  // Animation with subtle motion
   useFrame(({ clock }) => {
     if (!sphereRef.current || !groupRef.current) return;
     
     const time = clock.getElapsedTime();
     
-    // Gentle rotation
     groupRef.current.rotation.y = time * 0.05;
-    
-    // Subtle floating motion
     groupRef.current.position.y = Math.sin(time * 0.6) * 0.05;
     
-    // Update shader uniforms
     uniforms.time.value = time;
-    uniforms.isDark.value = theme === 'dark';
     uniforms.glowIntensity.value = isProcessing 
       ? 0.8 + Math.sin(time * 3) * 0.2 
       : 0.5;
@@ -211,10 +198,17 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
 
   return (
     <>
-      {/* Enhanced particle field background */}
-      <ParticleSystem count={800} size={0.02} opacity={0.6} speed={0.03} range={25} excludeSphere={true} />
+      {/* Particles - theme-aware colors */}
+      <ParticleSystem 
+        count={800} 
+        size={0.02} 
+        opacity={0.6} 
+        speed={0.03} 
+        range={25} 
+        excludeSphere={true}
+      />
       
-      {/* Reduced sparkles around the sphere */}
+      {/* Sparkles - consistent blue color */}
       <Sparkles
         count={30}
         scale={[4, 4, 4]}
@@ -223,15 +217,13 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
         color="#4a9eff"
       />
       
-      {/* Main sphere group - reduced size */}
       <Float speed={1.0} rotationIntensity={0.1} floatIntensity={0.2}>
         <group 
           ref={groupRef}
           onPointerEnter={() => setIsHovered(true)}
           onPointerLeave={() => setIsHovered(false)}
-          scale={[0.7, 0.7, 0.7]} // Reduced size
+          scale={[0.7, 0.7, 0.7]}
         >
-          {/* Main holographic sphere */}
           <mesh ref={sphereRef} castShadow>
             <sphereGeometry args={[1, 128, 128]} />
             <shaderMaterial 
@@ -244,7 +236,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             />
           </mesh>
           
-          {/* Outer energy rings - subtle blue tint */}
+          {/* Outer energy rings - consistent blue color */}
           {[1.05, 1.1].map((scale, index) => (
             <mesh key={index} scale={[scale, scale, scale]}>
               <ringGeometry args={[0.98, 1.02, 64]} />
@@ -260,7 +252,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
         </group>
       </Float>
       
-      {/* Contact shadows for grounding */}
       <ContactShadows
         position={[0, -2, 0]}
         opacity={0.2}
@@ -272,7 +263,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   );
 };
 
-// Error boundary for Three.js rendering issues
 class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {
     super(props);
@@ -291,7 +281,6 @@ class ThreeErrorBoundary extends React.Component<{children: React.ReactNode}, {h
   }
 }
 
-// Main component with enhanced responsive rendering
 const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
   const { theme } = useTheme();
 
@@ -301,7 +290,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
     }
   }, []);
 
-  // Helper function to get responsive FOV
   const getResponsiveFOV = () => {
     return window.innerWidth < 768 ? 60 : 45;
   };
@@ -330,7 +318,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             gl.toneMappingExposure = 1.0;
             scene.fog = new THREE.FogExp2(theme === 'dark' ? 0x000000 : 0xffffff, 0.01);
             
-            // Responsive camera adjustment
             const handleResize = () => {
               if (camera instanceof THREE.PerspectiveCamera) {
                 camera.fov = getResponsiveFOV();
@@ -340,7 +327,7 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
             window.addEventListener('resize', handleResize);
           }}
         >
-          {/* Background color - consistent for both modes */}
+          {/* Theme-aware background */}
           <color attach="background" args={[theme === 'dark' ? '#000000' : '#ffffff']} />
           
           <ambientLight intensity={0.1} color="#ffffff" />
@@ -382,7 +369,6 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
         </Canvas>
       </ThreeErrorBoundary>
       
-      {/* Minimal overlay UI */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-2 left-2 text-xs font-mono opacity-40">
           NEURAL_INTERFACE

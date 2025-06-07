@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -32,7 +31,12 @@ import {
   Youtube,
   Twitter,
   Music,
-  Globe
+  Globe,
+  Home,
+  Sliders,
+  User,
+  Shield,
+  Palette
 } from 'lucide-react';
 import SpotifyIcon from '../components/icons/SpotifyIcon';
 
@@ -482,6 +486,107 @@ const DashboardPage = () => {
     );
   };
 
+  // New Settings Tab
+  const SettingsTab = () => {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold">Settings</h3>
+          <p className="text-muted-foreground">Manage your account and application preferences</p>
+        </div>
+        
+        <div className="grid gap-6">
+          {/* Account Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" style={{ color: moodColor }} />
+                Account Settings
+              </CardTitle>
+              <CardDescription>
+                Manage your profile and account information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Profile Visibility</h4>
+                  <p className="text-sm text-muted-foreground">Make your profile visible to other users</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Data Analytics</h4>
+                  <p className="text-sm text-muted-foreground">Allow collection of usage analytics</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Privacy Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" style={{ color: moodColor }} />
+                Privacy & Security
+              </CardTitle>
+              <CardDescription>
+                Control your privacy and security preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Two-Factor Authentication</h4>
+                  <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                </div>
+                <Button variant="outline" size="sm">Enable</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Data Export</h4>
+                  <p className="text-sm text-muted-foreground">Download your personal data</p>
+                </div>
+                <Button variant="outline" size="sm">Export</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Appearance Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" style={{ color: moodColor }} />
+                Appearance
+              </CardTitle>
+              <CardDescription>
+                Customize the look and feel of your interface
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Animations</h4>
+                  <p className="text-sm text-muted-foreground">Enable interface animations</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Reduced Motion</h4>
+                  <p className="text-sm text-muted-foreground">Minimize motion for accessibility</p>
+                </div>
+                <Switch />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Layout>
       <div className="container mx-auto p-6 space-y-6">
@@ -504,18 +609,31 @@ const DashboardPage = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="macros">Macros</TabsTrigger>
-            <TabsTrigger value="notifications">
-              <Bell className="h-4 w-4 mr-2" />
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="macros" className="flex items-center gap-2">
+              <Sliders className="h-4 w-4" />
+              Macros
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="connections">
-              <Users className="h-4 w-4 mr-2" />
+            <TabsTrigger value="connections" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
               Connections
             </TabsTrigger>
-            <TabsTrigger value="personality">Personality</TabsTrigger>
+            <TabsTrigger value="personality" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              Personality
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -536,6 +654,10 @@ const DashboardPage = () => {
 
           <TabsContent value="personality" className="mt-6">
             <PersonalityTab />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-6">
+            <SettingsTab />
           </TabsContent>
         </Tabs>
       </div>
