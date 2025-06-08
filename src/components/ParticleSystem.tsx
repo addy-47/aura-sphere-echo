@@ -10,7 +10,6 @@ interface ParticleSystemProps {
   opacity?: number;
   speed?: number;
   range?: number;
-  excludeSphere?: boolean;
 }
 
 const ParticleSystem: React.FC<ParticleSystemProps> = ({ 
@@ -18,8 +17,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
   size = 0.02, 
   opacity = 0.6,
   speed = 0.05,
-  range = 20,
-  excludeSphere = true
+  range = 20
 }) => {
   const mesh = useRef<THREE.Points>(null);
   const { theme } = useTheme();
@@ -27,21 +25,12 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
   const particlesPosition = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      let x, y, z, distance;
-      
-      do {
-        x = (Math.random() - 0.5) * range;
-        y = (Math.random() - 0.5) * range;
-        z = (Math.random() - 0.5) * range;
-        distance = Math.sqrt(x * x + y * y + z * z);
-      } while (excludeSphere && distance < 2.0);
-      
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      positions[i * 3] = (Math.random() - 0.5) * range;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * range;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * range;
     }
     return positions;
-  }, [count, range, excludeSphere]);
+  }, [count, range]);
 
   useFrame(({ clock }) => {
     if (mesh.current) {
@@ -62,7 +51,7 @@ const ParticleSystem: React.FC<ParticleSystemProps> = ({
       </bufferGeometry>
       <pointsMaterial
         size={size}
-        color={theme === 'dark' ? '#ffffff' : '#000000'}
+        color={theme === 'dark' ? '#00ffff' : '#333333'}
         transparent
         opacity={opacity}
         sizeAttenuation
