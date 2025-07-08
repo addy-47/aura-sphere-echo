@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useCallback, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { useTheme } from '../contexts/ThemeContext';
 import { useMood } from '../contexts/MoodContext';
 import ParticleSystem from './ParticleSystem';
@@ -13,41 +13,66 @@ interface LoaderComponentProps {
 const LoadingOrb: React.FC = () => {
   const { theme } = useTheme();
   const { moodColor } = useMood();
+  const meshRef = React.useRef<THREE.Group>(null);
+  
+  // Rotation animation with useFrame
+  useFrame(({ clock }) => {
+    if (meshRef.current) {
+      const time = clock.getElapsedTime();
+      meshRef.current.rotation.y = time * 0.8;
+      meshRef.current.rotation.x = Math.sin(time * 0.5) * 0.3;
+      // Pulsing scale animation
+      const scale = 1 + Math.sin(time * 2) * 0.1;
+      meshRef.current.scale.setScalar(scale);
+    }
+  });
   
   return (
-    <mesh>
-      <sphereGeometry args={[0.5, 32, 32]} />
-      <meshBasicMaterial
-        color={theme === 'dark' ? '#000000' : '#ffffff'}
-        transparent
-        opacity={0.8}
-      />
-      <mesh scale={[1.1, 1.1, 1.1]}>
-        <sphereGeometry args={[0.5, 16, 16]} />
+    <group ref={meshRef}>
+      <mesh>
+        <sphereGeometry args={[0.5, 32, 32]} />
         <meshBasicMaterial
-          color={moodColor}
+          color={theme === 'dark' ? '#000000' : '#ffffff'}
           transparent
-          opacity={0.3}
-          wireframe
+          opacity={0.8}
         />
+        <mesh scale={[1.1, 1.1, 1.1]}>
+          <sphereGeometry args={[0.5, 16, 16]} />
+          <meshBasicMaterial
+            color={moodColor}
+            transparent
+            opacity={0.3}
+            wireframe
+          />
+        </mesh>
       </mesh>
-    </mesh>
+    </group>
   );
 };
 
 const LoaderComponent: React.FC<LoaderComponentProps> = ({ isLoading }) => {
   const { theme } = useTheme();
 
+  // Responsive sizing based on viewport
+  const containerClasses = useMemo(() => 
+    `absolute inset-0 z-10 flex items-center justify-center
+     transition-opacity duration-1000 ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`,
+    [isLoading]
+  );
+
+  // Black background for seamless transition
+  const backgroundStyle = useMemo(() => ({
+    background: '#000000',
+    backdropFilter: 'blur(10px)'
+  }), []);
+
   if (!isLoading) return null;
 
   return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center">
+    <div className={containerClasses}>
       <div 
         className="w-full h-full rounded-xl transition-all duration-500"
-        style={{ 
-          background: theme === 'dark' ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)'
-        }}
+        style={backgroundStyle}
       >
         <Canvas 
           camera={{ position: [0, 0, 3], fov: 45 }}

@@ -409,6 +409,84 @@ const DashboardPage = () => {
     );
   };
 
+  // Settings Tab Content
+  const SettingsTab = () => {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold">Settings</h3>
+          <p className="text-muted-foreground">Manage your preferences and account settings</p>
+        </div>
+        
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Preferences</CardTitle>
+              <CardDescription>Customize your experience</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Dark Mode</h4>
+                  <p className="text-sm text-muted-foreground">Toggle between light and dark themes</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Analytics</h4>
+                  <p className="text-sm text-muted-foreground">Share usage data to improve the service</p>
+                </div>
+                <Switch />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Behavior</CardTitle>
+              <CardDescription>Customize how Neura responds</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Formal Responses</h4>
+                  <p className="text-sm text-muted-foreground">Use formal language in conversations</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Proactive Suggestions</h4>
+                  <p className="text-sm text-muted-foreground">Allow AI to suggest topics or actions</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Management</CardTitle>
+              <CardDescription>Manage your account and data</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button variant="outline" className="w-full justify-start">
+                Export Data
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                Import Settings
+              </Button>
+              <Button variant="destructive" className="w-full justify-start">
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  };
+
   // Personality Tab Content
   const PersonalityTab = () => {
     const traits = [
@@ -504,9 +582,15 @@ const DashboardPage = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="macros">Macros</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="overview">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="macros">
+              <Zap className="h-4 w-4 mr-2" />
+              Macros
+            </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell className="h-4 w-4 mr-2" />
               Notifications
@@ -515,7 +599,14 @@ const DashboardPage = () => {
               <Users className="h-4 w-4 mr-2" />
               Connections
             </TabsTrigger>
-            <TabsTrigger value="personality">Personality</TabsTrigger>
+            <TabsTrigger value="personality">
+              <Brain className="h-4 w-4 mr-2" />
+              Personality
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -536,6 +627,10 @@ const DashboardPage = () => {
 
           <TabsContent value="personality" className="mt-6">
             <PersonalityTab />
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-6">
+            <SettingsTab />
           </TabsContent>
         </Tabs>
       </div>

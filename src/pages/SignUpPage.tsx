@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import MagicCard from '../components/MagicCard';
 import { Facebook, Eye, EyeOff } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useTheme } from '../contexts/ThemeContext';
@@ -53,7 +54,7 @@ const SignUpPage = () => {
     <Layout>
       <div className="container mx-auto px-4 py-12 flex items-center justify-center">
         <div className="w-full max-w-md">
-          <Card className={`${theme === 'dark' ? 'border-white/5 bg-black/30' : 'border-black/5 bg-white/90'} backdrop-blur-lg`}>
+          <MagicCard>
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
               <CardDescription className="text-center">
@@ -174,7 +175,7 @@ const SignUpPage = () => {
                 </Button>
               </div>
             </CardFooter>
-          </Card>
+          </MagicCard>
         </div>
       </div>
     </Layout>

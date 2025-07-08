@@ -28,7 +28,6 @@ interface GlassSphereProps {
 const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
   const sphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const innerSphereRef = useRef<THREE.Mesh>(null);
   const { theme } = useTheme();
   const { moodColor } = useMood();
   const [isHovered, setIsHovered] = useState(false);
@@ -234,11 +233,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     // Floating motion
     groupRef.current.position.y = Math.sin(time * 0.8) * 0.1;
     
-    // Inner sphere counter-rotation
-    if (innerSphereRef.current) {
-      innerSphereRef.current.rotation.x = -time * 0.3;
-      innerSphereRef.current.rotation.y = time * 0.4;
-    }
     
     // Update shader uniforms
     uniforms.time.value = time;
@@ -284,16 +278,6 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
             />
           </mesh>
           
-          {/* Inner energy core */}
-          <mesh ref={innerSphereRef} scale={[0.3, 0.3, 0.3]}>
-            <sphereGeometry args={[1, 32, 32]} />
-            <meshBasicMaterial
-              color={moodColor}
-              transparent={true}
-              opacity={0.4}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
           
           {/* Outer energy rings */}
           {[1.1, 1.2, 1.3].map((scale, index) => (
@@ -369,10 +353,13 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
   }, []);
 
   return (
-    <div className="w-full h-full min-h-[300px] relative overflow-hidden">
+    <div className="w-full h-full min-h-[clamp(200px,40vh,400px)] relative overflow-hidden">
       <ThreeErrorBoundary>
         <Canvas 
-          camera={{ position: [0, 0, 4], fov: 45 }}
+          camera={{ 
+            position: [0, 0, 4], 
+            fov: window.innerWidth < 768 ? 55 : 45 
+          }}
           dpr={[1, 2]} 
           shadows={false}
           gl={{ 
