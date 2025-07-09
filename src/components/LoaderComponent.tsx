@@ -53,10 +53,10 @@ const LoadingOrb: React.FC = () => {
 const LoaderComponent: React.FC<LoaderComponentProps> = ({ isLoading }) => {
   const { theme } = useTheme();
 
-  // Responsive sizing based on viewport
+  // Slow fade transition - extended duration for smoother transition
   const containerClasses = useMemo(() => 
     `absolute inset-0 z-10 flex items-center justify-center
-     transition-opacity duration-1000 ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`,
+     transition-opacity duration-[3000ms] ease-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'}`,
     [isLoading]
   );
 

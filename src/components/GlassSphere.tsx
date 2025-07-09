@@ -37,7 +37,7 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
     time: { value: 0 },
     isDark: { value: theme === 'dark' },
     glowColor: { value: new THREE.Color(moodColor) },
-    rimColor: { value: new THREE.Color('#00ffff') },
+    rimColor: { value: new THREE.Color('#1a3366') },
     baseColor: { value: new THREE.Color(theme === 'dark' ? '#000510' : '#f0f8ff') },
     centerColor: { value: new THREE.Color('#000000') },
     edgeColor: { value: new THREE.Color('#404040') },
@@ -167,17 +167,17 @@ const HolographicSphere = ({ isProcessing = false }: GlassSphereProps) => {
       float distanceFromCenter = length(vPosition);
       float normalizedDistance = distanceFromCenter;
       
-      // Advanced gradient with holographic interference
+      // Advanced gradient with blackish blue tones
       vec3 gradientColor;
       if (isDark) {
-        // Dark mode: pure black center to cyan-tinted edge
-        vec3 darkCenter = vec3(0.0, 0.0, 0.05);
-        vec3 darkEdge = vec3(0.0, 0.3, 0.4);
+        // Dark mode: pure black center to darker blue edges
+        vec3 darkCenter = vec3(0.0, 0.0, 0.0);
+        vec3 darkEdge = vec3(0.02, 0.06, 0.15);
         gradientColor = mix(darkCenter, darkEdge, normalizedDistance);
       } else {
-        // Light mode: bright center to blue edge with better contrast
-        vec3 lightCenter = vec3(0.85, 0.92, 1.0);
-        vec3 lightEdge = vec3(0.2, 0.5, 0.8);
+        // Light mode: black center to darker blue edges
+        vec3 lightCenter = vec3(0.0, 0.0, 0.0);
+        vec3 lightEdge = vec3(0.05, 0.1, 0.25);
         gradientColor = mix(lightCenter, lightEdge, normalizedDistance);
       }
       

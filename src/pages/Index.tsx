@@ -40,11 +40,13 @@ const Index = () => {
         />
         
         <div className="max-w-4xl mx-auto flex flex-col items-center z-10 space-y-8 relative">
-          {/* Main Hero Text - Centered */}
+          {/* Main Hero Text - Centered with neutral gradient */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tighter mb-2 text-center">
-            Your Digital
+            <span className="bg-gradient-to-r from-gray-600 via-gray-800 to-black bg-clip-text text-transparent">
+              Your Digital
+            </span>
             <br />
-            <span className={`gradient-text ${theme === 'dark' ? 'from-gray-100 to-gray-400' : 'from-gray-700 to-gray-900'} animate-gradient font-normal`}>
+            <span className="bg-gradient-to-r from-black via-gray-700 to-gray-500 bg-clip-text text-transparent font-normal animate-pulse">
               Doppelgänger
             </span>
           </h1>
