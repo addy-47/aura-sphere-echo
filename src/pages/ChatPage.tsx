@@ -137,9 +137,7 @@ const ChatPage = () => {
               }}
             >
               <LoaderComponent isLoading={isLoading} />
-              <div className={`transition-opacity duration-[3000ms] ease-in ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-                <GlassSphere isProcessing={isProcessing} />
-              </div>
+              {!isLoading && <GlassSphere isProcessing={isProcessing} />}
             </div>
           </div>
           
@@ -256,9 +254,7 @@ const ChatPage = () => {
             }}
           >
             <LoaderComponent isLoading={isLoading} />
-            <div className={`transition-opacity duration-[3000ms] ease-in ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-              <GlassSphere isProcessing={isProcessing} />
-            </div>
+            {!isLoading && <GlassSphere isProcessing={isProcessing} />}
           </div>
         </div>
         

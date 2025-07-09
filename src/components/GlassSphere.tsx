@@ -353,12 +353,12 @@ const GlassSphere: React.FC<GlassSphereProps> = ({ isProcessing = false }) => {
   }, []);
 
   return (
-    <div className="w-full h-full min-h-[clamp(200px,35vh,400px)] max-h-[clamp(300px,50vh,600px)] relative overflow-hidden">
+    <div className="w-full h-full min-h-[clamp(200px,40vh,400px)] relative overflow-hidden">
       <ThreeErrorBoundary>
         <Canvas 
           camera={{ 
             position: [0, 0, 4], 
-            fov: typeof window !== 'undefined' && window.innerWidth < 768 ? 60 : window.innerWidth < 1024 ? 50 : 45 
+            fov: window.innerWidth < 768 ? 55 : 45 
           }}
           dpr={[1, 2]} 
           shadows={false}
