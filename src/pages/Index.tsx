@@ -61,20 +61,35 @@ const Index = () => {
             An AI-powered digital reflection that evolves with your personality
           </p>
           
-          {/* Enhanced 3D Sphere representation - CENTERED */}
+          {/* Enhanced 3D Sphere representation - CENTERED with gradient effects */}
           <div className="my-12 flex justify-center items-center w-full">
             <div 
-              className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-2 md:mb-4 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105"
+              className="w-48 h-48 md:w-56 md:h-56 rounded-full mb-2 md:mb-4 relative sphere-shadow z-20 cursor-pointer transition-all duration-500 hover:scale-105 group"
               style={{ 
-                background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
-                backgroundColor: '#1a1a1a',
-                boxShadow: '0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.1)'
+                background: theme === 'dark' 
+                  ? 'radial-gradient(circle at 30% 30%, rgba(100, 100, 120, 0.4) 0%, rgba(20, 20, 40, 0.8) 40%, rgba(0, 0, 0, 1) 70%)'
+                  : 'radial-gradient(circle at 30% 30%, rgba(200, 200, 220, 0.6) 0%, rgba(100, 100, 140, 0.8) 40%, rgba(20, 20, 40, 1) 70%)',
+                boxShadow: theme === 'dark'
+                  ? '0 0 80px rgba(100, 100, 150, 0.3), inset 0 0 40px rgba(100, 100, 150, 0.2)'
+                  : '0 0 80px rgba(80, 80, 120, 0.4), inset 0 0 40px rgba(80, 80, 120, 0.3)'
               }}
             >
-              <div className="absolute inset-0 rounded-full" 
+              <div className="absolute inset-0 rounded-full transition-all duration-500 group-hover:opacity-80" 
                 style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 40%, transparent 70%)',
-                  boxShadow: '0 0 30px 5px rgba(255, 255, 255, 0.15)'
+                  background: theme === 'dark'
+                    ? 'linear-gradient(135deg, rgba(150,150,180,0.3) 0%, rgba(80,80,120,0.2) 40%, transparent 70%)'
+                    : 'linear-gradient(135deg, rgba(200,200,230,0.4) 0%, rgba(120,120,160,0.3) 40%, transparent 70%)',
+                  boxShadow: theme === 'dark'
+                    ? '0 0 30px 5px rgba(100, 100, 150, 0.2)'
+                    : '0 0 30px 5px rgba(80, 80, 120, 0.25)'
+                }}
+              />
+              {/* Add gradient shimmer effect */}
+              <div className="absolute inset-0 rounded-full opacity-50 animate-pulse"
+                style={{
+                  background: theme === 'dark'
+                    ? 'conic-gradient(from 0deg, transparent, rgba(150,150,200,0.3), transparent)'
+                    : 'conic-gradient(from 0deg, transparent, rgba(120,120,180,0.4), transparent)'
                 }}
               />
             </div>

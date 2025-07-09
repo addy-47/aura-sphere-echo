@@ -66,7 +66,7 @@ const LoaderComponent: React.FC<LoaderComponentProps> = ({ isLoading }) => {
     backdropFilter: 'blur(10px)'
   }), []);
 
-  if (!isLoading) return null;
+  // Always render but control opacity for smooth transition
 
   return (
     <div className={containerClasses}>
